@@ -1,0 +1,21 @@
+# Secrets - must never enter the image. Inject via docker run -e / compose / k8s secrets.
+.env
+.env.*
+*.env
+
+# Local virtualenv - host paths are baked into it and will break the container
+.venv/
+venv/
+env/
+
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+tests/
+*.log
+.DS_Store
+.git/
+.gitignore
