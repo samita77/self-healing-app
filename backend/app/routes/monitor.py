@@ -24,6 +24,7 @@ def check_and_heal(url: str, deployment_name: str, deployment_id: int, db: Sessi
         error="; ".join(probe.errors) or None,
         health_score=score_result["score"],
         status=score_result["status"],
+        components=score_result["components"]
     )
     db.add(health_check_record)
     db.commit()

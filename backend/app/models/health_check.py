@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, Boolean, DateTime, ForeignKey, String
+from sqlalchemy import JSON, Column, Integer, Float, Boolean, DateTime, ForeignKey, String
 from sqlalchemy.sql import func
 from app.core.database import Base
 
@@ -12,4 +12,5 @@ class HealthCheck(Base):
     error = Column(String, nullable=True)
     health_score = Column(Float, nullable=False)
     status = Column(String, nullable=False) # SUCCESSFUL, WARNING, FAILED
+    components = Column(JSON, nullable=True)
     checked_at = Column(DateTime(timezone=True), server_default=func.now())

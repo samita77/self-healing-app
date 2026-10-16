@@ -1,0 +1,45 @@
+export type Status = "SUCCESSFUL" | "WARNING" | "FAILED";
+
+export interface ScoreComponents {
+    S_availability: number;
+    R_response_time: number;
+    E_error_rate: number;
+    P_pod_readiness: number;
+}
+
+export interface Project {
+    id: number;
+    name: string;
+    repo_url: string;
+    docker_image_name: string;
+    created_at: string;
+}
+
+export interface Deployment {
+    id: number;
+    project_id: number;
+    version: string;
+    status: string;
+    health_score: number | null;
+    deployed_at: string;
+}
+
+export interface HealthCheck{
+    id: number;
+    deployment_id: number;
+    available: boolean;
+    response_time_ms: number | null;
+    error: string | null;
+    health_score: number;
+    status: Status;
+    components: ScoreComponents | null;
+    checked_at: String;
+}
+
+export interface RollbackEvent {
+    id: number;
+    deployment_id: number;
+    reason: string;
+    success: boolean;
+    triggered_at: string;
+}
