@@ -13,11 +13,11 @@ async function get<T>(path:string): Promise<T> {
     return res.json();
 }
 
-export const getProjects = () => get<Project[]>("/projects");
+export const getProjects = () => get<Project[]>("/projects/");
 export const getProject = (id: number) => get<Project>(`/projects/${id}`);
 
 export const getDeployments = (projectId?: number) => get<Deployment[]>(
-   `/deployments${projectId ? `?project_id=${projectId}` : ""}`,
+   `/deployments/${projectId ? `?project_id=${projectId}` : ""}`,
 );
 
 export const getDeployment = (id: number) => get<Deployment>(`/deployments/${id}`);

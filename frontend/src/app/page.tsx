@@ -1,3 +1,4 @@
+import HealthGauge from "@/components/HealthGauge";
 import { getProjects } from "@/lib/api";
 import type { Project, Status } from "@/lib/types";
 import { Suspense } from "react";
@@ -8,7 +9,7 @@ function ProjectSkeleton() {
       {[0, 1, 2].map((i) => (
         <li
           key={i}
-          className="h-[66px] rounded-lg-bg-[#1B2336] border border-slate 700 animate-pulse" />
+          className="h-[66px] rounded-lg bg-[#1B2336] border border-slate 700 animate-pulse" />
       ))}
     </ul>
   );
@@ -39,7 +40,7 @@ async function ProjectList() {
   );
 }
 
-export default async function Home() {
+export default function Home() {
   return (
     <main className="p-10">
       <h1 className="text-2xl font-semibold mb-6">Projects</h1>
