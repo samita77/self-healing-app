@@ -38,7 +38,8 @@ export default function HealthGauge({
 
     return (
        <div className="flex items-center gap-6">
-        <svg width="140" height="100" viewBox="0 0 140 100" role="img" aria-label="{`Health score ${clamped} out of 100`}">
+        <svg 
+        width="140" height="130" viewBox="0 0 140 130" role="img" aria-label={`Health score ${clamped} out of 100`}>
             <path d={arc(0, warning)} fill="none" stroke="var(--status-failed)" strokeWidth="12" strokeLinecap="butt" />
             <path d={arc(warning, healthy)} fill="none" stroke="var(--status-warning)" strokeWidth="12" strokeLinecap="butt" />
             <path d={arc(healthy, 100)} fill="none" stroke="var(--status-healthy)" strokeWidth="12" strokeLinecap="butt" />
@@ -56,7 +57,7 @@ export default function HealthGauge({
             <p className="text-4xl font-semibold tabular-nums" style={{ color: colour }}>
                 {clamped}
             </p>
-            <p className="text-4xl text-slate-400 mt-1">
+            <p className="text-xs text-slate-400 mt-1">
                 out of 100 &middot; target {healthy}
             </p>
         </div>

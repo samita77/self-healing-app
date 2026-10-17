@@ -9,7 +9,7 @@ function ProjectSkeleton() {
       {[0, 1, 2].map((i) => (
         <li
           key={i}
-          className="h-[66px] rounded-lg bg-[#1B2336] border border-slate 700 animate-pulse" />
+          className="h-[66px] rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse" />
       ))}
     </ul>
   );
