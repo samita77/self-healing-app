@@ -22,6 +22,6 @@ export const getDeployments = (projectId?: number) => get<Deployment[]>(
 
 export const getDeployment = (id: number) => get<Deployment>(`/deployments/${id}`);
 
-export const getHealthChecks = (id: number) => get<HealthCheck>(`/deployments/${id}/health-checks`);
+export const getHealthChecks = (id: number) => get<HealthCheck[]>(`/deployments/${id}/health-checks`);
 
-export const getRollbackEvents = (id: number) => get<RollbackEvent>(`/deployments/${id}/rollback-events`);
+export const getRollbackEvents = (id: number) => get<RollbackEvent[]>(`/deployments/${id}/rollback-events`);

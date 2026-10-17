@@ -1,6 +1,7 @@
 import HealthGauge from "@/components/HealthGauge";
 import { getProjects } from "@/lib/api";
 import type { Project, Status } from "@/lib/types";
+import Link from "next/link";
 import { Suspense } from "react";
 
 function ProjectSkeleton() {
@@ -43,7 +44,13 @@ async function ProjectList() {
 export default function Home() {
   return (
     <main className="p-10">
-      <h1 className="text-2xl font-semibold mb-6">Projects</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Projects</h1>
+        <Link
+        href="/deployments" className="text-xs text-slate-400 underline underline-offset-2">
+          View all deployments
+        </Link>
+      </div>
         <Suspense fallback={<ProjectSkeleton />}>
           <ProjectList />
         </Suspense>
