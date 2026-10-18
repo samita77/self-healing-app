@@ -30,11 +30,13 @@ async function ProjectList() {
   return (
     <ul className="space-y-2">
       {projects.map((p: Project) => (
-        <li
-          key={p.id}
-          className="rounded-lg border border-slate-600 bg-[#1B2336] p-4 flex justify-between items-center">
-          <span className="text-sm">{p.name}</span>
-          <span className="font-mono text-xs text-slate-400">{p.repo_url}</span>
+        <li key={p.id}>
+          <Link
+            href={`/projects/${p.id}`}
+            className="block rounded-lg border border-slate-600 bg-[#1B2336] p-4 flex justify-between items-center hover:border-slate-400">
+              <span className="text-sm">{p.name}</span>
+              <span className="font-mono text-xs text-slate-400">{p.repo_url}</span>
+            </Link>
         </li>
       ))}
     </ul>
@@ -43,8 +45,8 @@ async function ProjectList() {
 
 export default function Home() {
   return (
-    <main className="p-10">
-      <div className="mb-6 flex items-center justify-between">
+    <main className="p-10 space-y-6">
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Projects</h1>
         <Link
         href="/deployments" className="text-xs text-slate-400 underline underline-offset-2">
