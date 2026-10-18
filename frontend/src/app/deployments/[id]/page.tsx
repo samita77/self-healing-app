@@ -8,14 +8,23 @@ import {
 } from "@/lib/api";
 import type { Status } from "@/lib/types";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-export default async function DeploymentPage({
-  params,
+function DeploymentSkeleton(){
+  return (
+    <div className="space-y-4" aria-busy="true" aria-label="Loading deployment">
+      <div className="h-9 w-64 rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse" />
+      <div className="h-40 rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse" />
+      <div className="h-40 rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse" />
+    </div>
+  );
+}
+
+async function DeploymentBody({
+  deploymentId,
 }: {
-  params: Promise<{ id: string }>;
+  deploymentId: number;
 }) {
-  const { id } = await params;
-  const deploymentId = Number(id);
 
  const [deployment, checks, rollbacks] = await Promise.all([
     getDeployment(deploymentId).catch(() => null),
@@ -79,4 +88,20 @@ export default async function DeploymentPage({
       </section>
     </main>
   );
+}
+
+export default async function DeploymentPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  return (
+    <main className="p-10 space-y-8">
+      <Suspense fallback={<DeploymentSkeleton />}>
+        <DeploymentBody deploymentId={Number(id)}/>
+      </Suspense>
+    </main>
+  )
 }

@@ -1,8 +1,8 @@
 import { getDeployments, getProject } from "@/lib/api";
 import { Deployment } from "@/lib/types";
 import { notFound } from "next/navigation";
-import { runPipeline } from "./[id]/action";
-import SubmitButton from "./[id]/SubmitButton";
+import { runPipeline } from "./action";
+import SubmitButton from "./SubmitButton";
 import Link from "next/link";
 import { Suspense } from "react";
 
