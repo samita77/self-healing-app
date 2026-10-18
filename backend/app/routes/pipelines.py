@@ -4,14 +4,13 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
-from app.deployment.deployment_manager import DeploymentManager
 from app.models.pipeline import PipelineRun
 from app.models.project import Project
 from app.pipeline.build_stage import BuildStage
 from app.pipeline.pipeline_runner import PipelineRunner
 from app.pipeline.push_stage import PushStage
+from app.pipeline.states import PipelineState
 from app.pipeline.test_stage import TestStage
 from app.services.docker_service import DockerService
 from app.services.git_service import GitService
@@ -37,7 +36,7 @@ def run_pipeline(project_id: int, db: Session = Depends(get_db)):
         project_id=project_id,
         commit_sha=head["commit_sha"],
         branch=head["branch"],
-        status="running"
+        status=PipelineState.CREATED.value,
     )
     db.add(run)
     db.commit()
@@ -53,10 +52,13 @@ def run_pipeline(project_id: int, db: Session = Depends(get_db)):
     stages = [BuildStage(docker), TestStage(), PushStage(docker)]
     result = PipelineRunner(stages).run(context)
 
-    run.status = "success" if result["status"] == "success" else "failed"
-    run.failed_stage = result.get("failed_at")
+    run.status = result["status"]
+    run.failed_stage = next(
+        (r["stage"] for r in result["results"] if not r["success"]), None
+    )
     run.stage_results = json.dumps(result["results"])
+    run.duration_seconds = result["duration_s"]
     run.finished_at = datetime.now(timezone.utc)
     db.commit()
 
-    return{**result, "pipeline_run_id": run.id, "image": image}
+    return {**result, "pipeline_run_id": run.id, "image": image}
