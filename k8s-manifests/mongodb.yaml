@@ -24,15 +24,14 @@ spec:
           limits:
             cpu: "200m"
             memory: "256Mi"
-          volumeMounts:
-            - name: mongo-storage
-              mountPath: /data/db
-          
-          volumes:
-            - name: mongo-storage
-              hostPath:
-                path: /tmp/mongodb
-                type: DirectoryOrCreate
+        volumeMounts:
+          - name: mongo-storage
+            mountPath: /data/db
+      volumes:
+        - name: mongo-storage
+          hostPath:
+            path: /tmp/mongodb
+            type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
