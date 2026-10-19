@@ -3,6 +3,7 @@ import { getProjects } from "@/lib/api";
 import type { Project, Status } from "@/lib/types";
 import Link from "next/link";
 import { Suspense } from "react";
+import ProjectForm from "./ProjectForm";
 
 function ProjectSkeleton() {
   return (
@@ -53,6 +54,8 @@ export default function Home() {
           View all deployments
         </Link>
       </div>
+
+        <ProjectForm />
         <Suspense fallback={<ProjectSkeleton />}>
           <ProjectList />
         </Suspense>

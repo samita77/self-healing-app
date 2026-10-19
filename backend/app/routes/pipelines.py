@@ -14,6 +14,7 @@ from app.pipeline.states import PipelineState
 from app.pipeline.test_stage import TestStage
 from app.services.docker_service import DockerService
 from app.services.git_service import GitService
+from app.schemas.pipeline_schema import PipelineRunResponse
 
 router = APIRouter(prefix="/pipelines", tags=["pipelines"])
 
@@ -62,3 +63,36 @@ def run_pipeline(project_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {**result, "pipeline_run_id": run.id, "image": image}
+
+@router.get("/runs/{project_id}", response_model=list[PipelineRunResponse])
+def list_pipeline_runs(project_id: int, db: Session = Depends(get_db)):
+    runs = (
+        db.query(PipelineRun)
+        .filter(PipelineRun.project_id == project_id)
+        .order_by(PipelineRun.id.desc())
+        .all()
+    )
+
+    results = []
+    for r in runs:
+        stages = []
+        if r.stage_results:
+            try:
+                stages = json.loads(r.stage_results)
+            except json.JSONDecodeError:
+                stages = []
+        results.append(
+            PipelineRunResponse(
+                id=r.id,
+                project_id=r.project_id,
+                commit_sha=r.commit_sha,
+                branch=r.branch,
+                status=r.status,
+                failed_stage=r.failed_stage,
+                duration_seconds=r.duration_seconds,
+                stage_results=stages,
+                started_at=r.started_at,
+                finished_at=r.finished_at,
+            )
+        )
+    return results

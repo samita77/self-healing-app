@@ -1,6 +1,7 @@
 import { type
     Deployment,
     HealthCheck,
+    PipelineRun,
     Project,
     RollbackEvent,
  } from "./types";
@@ -25,3 +26,6 @@ export const getDeployment = (id: number) => get<Deployment>(`/deployments/${id}
 export const getHealthChecks = (id: number) => get<HealthCheck[]>(`/deployments/${id}/health-checks`);
 
 export const getRollbackEvents = (id: number) => get<RollbackEvent[]>(`/deployments/${id}/rollback-events`);
+
+export const getPipelineRuns = (projectId: number) => 
+    get<PipelineRun[]>(`/pipelines/runs/${projectId}`);

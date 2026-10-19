@@ -43,3 +43,24 @@ export interface RollbackEvent {
     success: boolean;
     triggered_at: string;
 }
+
+export interface StageResult {
+    stage: string;
+    success: boolean;
+    state?: string;
+    duration_s?: number | null;
+    error?: string | null;
+}
+
+export interface PipelineRun {
+    id: number;
+    project_id: number;
+    commit_sha: string;
+    branch: string;
+    status: string;
+    failed_stage?: string | null;
+    duration_seconds?: number | null;
+    stage_results: StageResult[];
+    started_at?: string | null;
+    finished_at?: string | null;
+}
