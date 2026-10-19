@@ -1,0 +1,8 @@
+node_modules
+client
+nginx
+k8s
+assets
+docker-compose.yml
+.git
+*.md
