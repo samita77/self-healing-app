@@ -10,6 +10,7 @@ node_modules/
 .next/
 out/
 *.log
+nohup.out
 .DS_Store
 k8s-manifests/*secret*.yaml
 !k8s-manifests/secrets.example.yaml
