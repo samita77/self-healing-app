@@ -71,7 +71,7 @@ async function DeploymentBody({
         </section>
       )}
 
-       <section className="rounded-lg border border-slate-6060 bg-[#1B2336] p-6">
+       <section className="rounded-lg border border-slate-600 bg-[#1B2336] p-6">
         <h2 className="text-sm font-semibold mb-4">Health check history</h2>
 
         {checks.length === 0 ? (

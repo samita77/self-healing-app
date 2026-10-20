@@ -1,6 +1,6 @@
 import HealthGauge from "@/components/HealthGauge";
 import { getProjects } from "@/lib/api";
-import type { Project, Status } from "@/lib/types";
+import type { Project } from "@/lib/types";
 import Link from "next/link";
 import { Suspense } from "react";
 import ProjectForm from "./ProjectForm";
