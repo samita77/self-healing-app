@@ -7,22 +7,43 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.pipeline import PipelineRun
 from app.models.project import Project
+from app.models.user import User
 from app.pipeline.build_stage import BuildStage
 from app.pipeline.pipeline_runner import PipelineRunner
 from app.pipeline.push_stage import PushStage
 from app.pipeline.states import PipelineState
 from app.pipeline.test_stage import TestStage
+from app.routes.auth import get_current_user
 from app.services.docker_service import DockerService
 from app.services.git_service import GitService
 from app.schemas.pipeline_schema import PipelineRunResponse
 
 router = APIRouter(prefix="/pipelines", tags=["pipelines"])
 
-@router.post("/run/{project_id}")
-def run_pipeline(project_id: int, db: Session = Depends(get_db)):
-    project = db.query(Project).filter(Project.id == project_id).first()
+
+def _owned_project(project_id: int, current_user: User, db: Session) -> Project:
+    """Loads a project only if the caller owns it.
+
+    Returns 404 rather than 403 for a project owned by someone else: a
+    403 would confirm the project exists, which leaks information.
+    """
+    project = (
+        db.query(Project)
+        .filter(Project.id == project_id, Project.owner_id == current_user.id)
+        .first()
+    )
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+    return project
+
+
+@router.post("/run/{project_id}")
+def run_pipeline(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    project = _owned_project(project_id, current_user, db)
 
     git = GitService()
     try:
@@ -65,7 +86,13 @@ def run_pipeline(project_id: int, db: Session = Depends(get_db)):
     return {**result, "pipeline_run_id": run.id, "image": image}
 
 @router.get("/runs/{project_id}", response_model=list[PipelineRunResponse])
-def list_pipeline_runs(project_id: int, db: Session = Depends(get_db)):
+def list_pipeline_runs(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _owned_project(project_id, current_user, db)
+
     runs = (
         db.query(PipelineRun)
         .filter(PipelineRun.project_id == project_id)

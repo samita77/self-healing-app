@@ -6,6 +6,7 @@ from app.models.deployment import Deployment
 from app.models.health_check import HealthCheck
 from app.models.rollback_event import RollbackEvent
 from app.models.pipeline import PipelineRun
+from app.models.user import User
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool

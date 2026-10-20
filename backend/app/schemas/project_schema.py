@@ -1,16 +1,19 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+
 class ProjectCreate(BaseModel):
     name: str
     repo_url: str
     docker_image_name: str
+
 
 class ProjectResponse(BaseModel):
     id: int
     name: str
     repo_url: str
     docker_image_name: str
+    owner_id: int
     created_at: datetime
 
     class Config:

@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     manifest_dir: str = str(K8S_MANIFEST_DIR)
+    jwt_secret: str = "dev-only-secret-change-in-production"
 
     @property
     def database_url(self) -> str:

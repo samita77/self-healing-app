@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.routes import projects
 from app.routes import pipelines
+from app.routes import auth
 from app.deployment.k8s_client import K8sClient
 from sqlalchemy import text
 from app.routes import health
@@ -44,6 +45,7 @@ def test_deploy():
 
 app.include_router(projects.router)
 app.include_router(pipelines.router)
+app.include_router(auth.router)
 app.include_router(health.router)
 app.include_router(monitor.router)
 app.include_router(deployment_routes.router)
