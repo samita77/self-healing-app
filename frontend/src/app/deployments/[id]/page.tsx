@@ -71,6 +71,49 @@ async function DeploymentBody({
         </section>
       )}
 
+       <section className="rounded-lg border border-slate-6060 bg-[#1B2336] p-6">
+        <h2 className="text-sm font-semibold mb-4">Health check history</h2>
+
+        {checks.length === 0 ? (
+          <p className="text-sm text-slate-400">No health checks recorded.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs uppercase tracking-wide text-slate-400">
+                <th scope="col" className="py-2">Checked</th>
+                <th scope="col" className="py-2">Status</th>
+                <th scope="col" className="py-2 text-right">Score</th>
+                <th scope="col" className="py-2 text-right">p95 (ms)</th>
+                <th scope="col" className="py-2 text-right">Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...checks].reverse().map((h) => (
+                <tr key={h.id} className="border-t border-[#272F42]">
+                  <td className="py-2.5 font-mono text-xs text-slate-400">
+                    {h.checked_at.slice(0, 19).replace("T", " ")}
+                  </td>
+                  <td className="py-2.5">
+                    <StatusBadge status={h.status} />
+                  </td>
+                  <td className="py-2.5 text-right font-mono tabular-nums">
+                    {h.health_score.toFixed(1)}
+                  </td>
+                  <td className="py-2.5 text-right font-mono tabular-nums">
+                    {h.response_time_ms != null
+                      ? Math.round(h.response_time_ms)
+                      : "—"}
+                  </td>
+                  <td className="py-2.5 text-right font-mono text-xs text-red-400">
+                    {h.error ? "yes" : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
       <section className="rounded-lg border border-slate-600 bg-[#1B2336] p-6">
         <h2 className="text-sm font-semibold mb-4">Rollback history</h2>
         {rollbacks.length === 0 ? (
@@ -98,10 +141,8 @@ export default async function DeploymentPage({
   const { id } = await params;
 
   return (
-    <main className="p-10 space-y-8">
-      <Suspense fallback={<DeploymentSkeleton />}>
-        <DeploymentBody deploymentId={Number(id)}/>
-      </Suspense>
-    </main>
+    <Suspense fallback={<DeploymentSkeleton />}>
+      <DeploymentBody deploymentId={Number(id)} />
+    </Suspense>
   )
 }
