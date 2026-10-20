@@ -64,3 +64,11 @@ export interface PipelineRun {
     started_at?: string | null;
     finished_at?: string | null;
 }
+
+export interface User {
+    id: number;
+    email: string;
+    full_name: string;
+    role: "admin" | "developer";
+    created_at: string;
+}

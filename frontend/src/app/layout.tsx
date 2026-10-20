@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import Link from "next/link";
 import NavLink from "@/components/NavLink";
+import UserMenu from "@/components/UserMenu";
 import { Suspense } from "react";
+
+const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8000";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +24,31 @@ export const metadata: Metadata = {
   description: "Automated deployment, health scoring and rollback for containerised applications",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * Resolves the signed-in user for the header.
+ * Returns null on any failure rather than throwing - an unreadable token
+ * should show a signed-out header, not break the whole page.
+ */
+async function currentUser() {
+  const store = await cookies();
+  const token = store.get("token")?.value;
+  if (!token) return null;
+
+  try {
+    const res = await fetch(`${BACKEND}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as { email: string; role: string };
+  } catch {
+    return null;
+  }
+}
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const user = await currentUser();
+
   return (
     <html
       lang="en"
@@ -36,18 +64,25 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               </span>
             </Link>
 
-            <nav className="flex items-center gap-6" aria-label="Main">
+            <div className="flex items-center gap-6">
               {/*
                 NavLink reads usePathname(), which is request-time URL data.
                 Under cacheComponents that must sit inside a Suspense
                 boundary so the shell can still prerender.
               */}
               <Suspense fallback={null}>
-                <NavLink href="/">Projects</NavLink>
-                <NavLink href="/deployments">Deployments</NavLink>
-                <NavLink href="/metrics">Metrics</NavLink>
+                <nav className="flex items-center gap-6" aria-label="Main">
+                  <NavLink href="/">Projects</NavLink>
+                  <NavLink href="/deployments">Deployments</NavLink>
+                  <NavLink href="/metrics">Metrics</NavLink>
+                  {user?.role === "admin" && (
+                    <NavLink href="/users">Users</NavLink>
+                  )}
+                </nav>
               </Suspense>
-            </nav>
+
+              <UserMenu user={user} />
+            </div>
           </div>
         </header>
 

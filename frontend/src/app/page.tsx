@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 import ProjectForm from "./ProjectForm";
 
+// Fetches uncached data (projects), so navigation is declared non-instant.
+export const instant = false;
+
 function ProjectSkeleton() {
   return (
     <ul className="space-y-2" aria-busy="true" aria-label="Loading projects">

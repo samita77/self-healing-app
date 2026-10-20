@@ -1,3 +1,7 @@
+// The layout resolves the signed-in user per request, which is uncached
+// data - navigation is declared non-instant.
+export const instant = false;
+
 const GRAFANA = process.env.NEXT_PUBLIC_GRAFANA_URL ?? "";
 
 export default function MetricsPage() {

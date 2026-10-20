@@ -1,8 +1,10 @@
 import { getDeployments } from "@/lib/api";
 import { Deployment } from "@/lib/types";
-import { table } from "console";
 import Link from "next/link";
 import { Suspense } from "react";
+
+// Fetches uncached data, so navigation is declared non-instant.
+export const instant = false;
 
 function TableSkeleton(){
     return (

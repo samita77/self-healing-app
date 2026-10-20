@@ -5,6 +5,7 @@ import { type
     PipelineRun,
     Project,
     RollbackEvent,
+    User,
  } from "./types";
 
 /**
@@ -52,3 +53,5 @@ export const getRollbackEvents = (id: number) => get<RollbackEvent[]>(`/deployme
 
 export const getPipelineRuns = (projectId: number) =>
     get<PipelineRun[]>(`/pipelines/runs/${projectId}`);
+
+export const getUsers = () => get<User[]>("/users/");

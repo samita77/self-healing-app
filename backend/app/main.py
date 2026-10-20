@@ -8,6 +8,7 @@ from app.routes import health
 from app.routes import monitor
 from app.routes import deployment as deployment_routes
 from app.routes import deployments
+from app.routes import users
 from app.models import project, deployment as deployment_model, health_check, rollback_event
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -50,3 +51,4 @@ app.include_router(health.router)
 app.include_router(monitor.router)
 app.include_router(deployment_routes.router)
 app.include_router(deployments.router)
+app.include_router(users.router)
