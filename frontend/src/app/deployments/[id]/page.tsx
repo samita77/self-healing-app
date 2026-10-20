@@ -10,6 +10,10 @@ import type { Status } from "@/lib/types";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+// Dynamic route reading request-time data (params, cookies) - under
+// cacheComponents this declares the navigation is not expected to be instant.
+export const instant = false;
+
 function DeploymentSkeleton(){
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Loading deployment">

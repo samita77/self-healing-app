@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
-import { createProject, ProjectFormState } from "./actions";
+import { createProject, type FormState } from "./actions";
 
-const initial: ProjectFormState = { ok: false, error: "" };
+const initial: FormState = { ok: false, error: "" };
 
 export default function ProjectForm() {
   const [state, action, pending] = useActionState(createProject, initial);

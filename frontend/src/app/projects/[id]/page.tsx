@@ -6,6 +6,10 @@ import SubmitButton from "./SubmitButton";
 import Link from "next/link";
 import { Suspense } from "react";
 
+// Dynamic route reading request-time data (params, cookies) - under
+// cacheComponents this declares the navigation is not expected to be instant.
+export const instant = false;
+
 async function ProjectBody({
     projectId,
 }: {

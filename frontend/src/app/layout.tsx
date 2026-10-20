@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import NavLink from "@/components/NavLink";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,9 +37,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
 
             <nav className="flex items-center gap-6" aria-label="Main">
-              <NavLink href="/">Projects</NavLink>
-              <NavLink href="/deployments">Deployments</NavLink>
-              <NavLink href="/metrics">Metrics</NavLink>
+              {/*
+                NavLink reads usePathname(), which is request-time URL data.
+                Under cacheComponents that must sit inside a Suspense
+                boundary so the shell can still prerender.
+              */}
+              <Suspense fallback={null}>
+                <NavLink href="/">Projects</NavLink>
+                <NavLink href="/deployments">Deployments</NavLink>
+                <NavLink href="/metrics">Metrics</NavLink>
+              </Suspense>
             </nav>
           </div>
         </header>
