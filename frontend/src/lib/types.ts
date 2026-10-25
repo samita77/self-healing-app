@@ -20,6 +20,8 @@ export interface Deployment {
     project_id: number;
     version: string;
     status: string;
+    namespace?: string | null;
+    deployment_name?: string | null;
     health_score: number | null;
     deployed_at: string;
 }

@@ -1,4 +1,5 @@
 import subprocess
+from app.services.slug import slugify
 
 class DockerService:
     def __init__(self, registry: str = "localhost:5000"):
@@ -8,7 +9,7 @@ class DockerService:
         # Short SHA (7 chars) as an immutable tag.
         # Tagging by commit rather than "latest" is what makes rollback possible:
         # every deployed version has its own permanent tag.
-        return f"{self.registry}/{project_name}:{commit_sha[:7]}"
+        return f"{self.registry}/{slugify(project_name)}:{commit_sha[:7]}"
 
     def build(self, repo_path: str, image: str) -> bool:
         print(f"[DockerService] Building {image} from {repo_path}")

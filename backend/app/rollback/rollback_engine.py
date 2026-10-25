@@ -35,7 +35,7 @@ class RollbackEngine:
                 "consecutive_failures": consecutive_failures}
 
 
-    def rollback(self, deployment_name: str) -> dict:
+    def rollback(self, deployment_name: str, namespace: str = "default") -> dict:
         started = time.monotonic()
-        success = self.k8s_client.rollback_deployment(deployment_name)
+        success = self.k8s_client.rollback_deployment(deployment_name, namespace)
         return {"rolled_back": success, "duration_s": round(time.monotonic() - started, 2)}

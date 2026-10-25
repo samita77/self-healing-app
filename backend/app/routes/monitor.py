@@ -15,7 +15,6 @@ router = APIRouter(prefix="/monitor", tags=["monitor"])
 @router.get("/check-and-heal")
 def check_and_heal(
     url: str,
-    deployment_name: str,
     deployment_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -31,16 +30,30 @@ def check_and_heal(
     if not owned:
         raise HTTPException(status_code=404, detail="Deployment not found")
 
+    # The safeguard was previously hardcoded to True, which meant it could never fire. It is a database fact: is there an earlier successful deployment of this project to restore?
+    has_previous = (
+        db.query(Deployment)
+        .filter(
+            Deployment.project_id == owned.project_id,
+            Deployment.id < owned.id,
+            Deployment.status == "success",
+        )
+        .first()
+        is not None
+    )
+
     service = DeploymentHealthService()
-    ready, desired = K8sClient().get_replica_counts(deployment_name)
+    namespace = owned.namespace or "default"
+    ready, desired = K8sClient().get_replica_counts(owned.deployment_name, namespace)
 
     result = service.check_and_heal(
         url=url,
-        deployment_name=deployment_name,
+        deployment_name=owned.deployment_name,
+        namespace=namespace,
         ready=ready,
         desired=desired,
         consecutive_failures=2,
-        has_previous_version=True,
+        has_previous_version=has_previous,
     )
 
     record = service.persist_health_check(

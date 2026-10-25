@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import LoginForm from "./LoginForm";
+import Link from "next/link";
 
 // The page reads the session cookie, which is runtime data. Under
 // cacheComponents, `instant = false` declares that navigations here are not
@@ -29,6 +30,13 @@ export default async function LoginPage() {
         <p className="text-center text-xs text-slate-400">
           Demo: <span className="font-mono">admin@self-healing.dev</span> /{" "}
           <span className="font-mono">admin123</span>
+        </p>
+
+         <p className="text-center text-xs text-slate-400">
+          No account?{" "}
+          <Link href="/register" className="underline underline-offset-2">
+            Register
+          </Link>
         </p>
       </div>
     </main>

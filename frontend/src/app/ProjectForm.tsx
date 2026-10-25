@@ -38,17 +38,33 @@ export default function ProjectForm() {
         />
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="docker_image_name" className="block text-xs text-slate-400">
-          Image name
-        </label>
-        <input
-          id="docker_image_name"
-          name="docker_image_name"
-          required
-          placeholder="your-app"
-          className="w-full rounded-lg border border-slate-600 bg-[#0F172A] px-3 py-2 font-mono text-xs focus:border-green-500 focus:outline-none"
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label htmlFor="container_port" className="block text-xs text-slate-400">
+            Container port
+          </label>
+          <input
+            id="container_port"
+            name="container_port"
+            type="number"
+            defaultValue={5000}
+            required
+            className="w-full rounded-lg border border-slate-600 bg-[#0F172A] px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="health_path" className="block text-xs text-slate-400">
+            Health path
+          </label>
+          <input
+            id="health_path"
+            name="health_path"
+            defaultValue="/"
+            required
+            className="w-full rounded-lg border border-slate-600 bg-[#0F172A] px-3 py-2 font-mono text-xs focus:border-green-500 focus:outline-none"
+          />
+        </div>
       </div>
 
       {state.error && (

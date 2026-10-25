@@ -9,12 +9,14 @@ import {
 import type { Status } from "@/lib/types";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import HealthCheckForm from "./HealthCheckForm";
+import { checkHealth } from "./action";
 
 // Dynamic route reading request-time data (params, cookies) - under
 // cacheComponents this declares the navigation is not expected to be instant.
 export const instant = false;
 
-function DeploymentSkeleton(){
+function DeploymentSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Loading deployment">
       <div className="h-9 w-64 rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse" />
@@ -30,13 +32,13 @@ async function DeploymentBody({
   deploymentId: number;
 }) {
 
- const [deployment, checks, rollbacks] = await Promise.all([
+  const [deployment, checks, rollbacks] = await Promise.all([
     getDeployment(deploymentId).catch(() => null),
     getHealthChecks(deploymentId).catch(() => []),
     getRollbackEvents(deploymentId).catch(() => []),
- ])
+  ])
 
- if (!deployment) notFound();
+  if (!deployment) notFound();
 
   const latest = checks.length > 0 ? checks[checks.length - 1] : null;
 
@@ -61,7 +63,9 @@ async function DeploymentBody({
       {latest ? (
         <section className="rounded-lg border border-slate-600 bg-[#1B2336] p-6">
           <HealthGauge score={latest.health_score} />
- </section>
+        </section>
+
+
       ) : (
         <p className="text-sm text-slate-400">
           No health checks recorded for this deployment yet.
@@ -75,7 +79,7 @@ async function DeploymentBody({
         </section>
       )}
 
-       <section className="rounded-lg border border-slate-600 bg-[#1B2336] p-6">
+      <section className="rounded-lg border border-slate-600 bg-[#1B2336] p-6">
         <h2 className="text-sm font-semibold mb-4">Health check history</h2>
 
         {checks.length === 0 ? (
@@ -133,6 +137,26 @@ async function DeploymentBody({
           ))
         )}
       </section>
+      {deployment.deployment_name ? (
+        <section className="rounded-lg border border-slate-600 bg-[#1B2336] p-6 space-y-3">
+          <div>
+            <h2 className="text-sm font-semibold">Run a health check</h2>
+            <p className="mt-1 text-xs text-slate-400">
+              Probes the URL, scores it on availability, latency, errors and pod
+              readiness, and rolls back automatically if it stays below threshold.
+            </p>
+            <p className="mt-1 font-mono text-[11px] text-slate-500">
+              {deployment.namespace} / {deployment.deployment_name}
+            </p>
+          </div>
+          <HealthCheckForm action={checkHealth.bind(null, deployment.id)} />
+        </section>
+      ) : (
+        <p className="text-xs text-slate-400">
+          This deployment predates pipeline deployment, so it has no Kubernetes
+          identity to monitor.
+        </p>
+      )}
     </main>
   );
 }

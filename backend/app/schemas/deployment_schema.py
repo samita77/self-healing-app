@@ -12,6 +12,8 @@ class DeploymentResponse(BaseModel):
     project_id: int
     version: str
     status: str
+    namespace: Optional[str] = None
+    deployment_name: Optional[str] = None
     health_score: Optional[float] = None
     deployed_at: datetime
 

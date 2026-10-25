@@ -21,6 +21,7 @@ class DeploymentManager:
                 for container in doc["spec"]["template"]["spec"]["containers"]:
                     # Never re-pull a tag that already exists - required for rollback,
                     # since the previous image is already in the node's local cache.
+                    container["image"] = image
                     container["imagePullPolicy"] = "IfNotPresent"
         return docs
 

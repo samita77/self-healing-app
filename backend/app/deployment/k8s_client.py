@@ -1,5 +1,7 @@
 import subprocess
 
+import yaml
+
 class K8sClient:
     def apply_manifest(self, manifest_path: str) -> bool:
         result = subprocess.run(
@@ -12,6 +14,19 @@ class K8sClient:
             return False
         print(f"[K8sClient] apply SUCCESS:\n{result.stdout}")
         return True
+    
+    def apply_docs(self, docs: list[dict], timeout: int = 120) -> None:
+        """Applies generated manifests. Raises so the pipeline records why."""
+        rendered = yaml.safe_dump_all(docs, sort_keys=False)
+        result = subprocess.run(
+            ["kubectl", "apply", "-f", "-"],
+            input=rendered,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr[-2000:] or "kubectl apply failed")
 
     def get_pod_status(self, label_selector: str) -> list[str]:
         result = subprocess.run(
@@ -26,9 +41,9 @@ class K8sClient:
         )
         return [line for line in result.stdout.strip().splitlines() if line]
 
-    def rollback_deployment(self, deployment_name: str) -> bool:
+    def rollback_deployment(self, deployment_name: str, namespace: str = "default") -> bool:
         result = subprocess.run(
-            ["kubectl", "rollout", "undo", f"deployment/{deployment_name}"],
+            ["kubectl", "rollout", "undo", f"deployment/{deployment_name}", "-n", namespace],
             capture_output=True,
             text=True,
         )
@@ -38,9 +53,9 @@ class K8sClient:
         print(f"[K8sClient] rollback SUCCESS:\n{result.stdout}")
         return True
 
-    def wait_for_rollout(self, deployment_name: str, timeout: int = 120) -> bool:
+    def wait_for_rollout(self, deployment_name: str, timeout: int = 120, namespace: str = "default") -> bool:
         result = subprocess.run(
-            ["kubectl", "rollout", "status", f"deployment/{deployment_name}",
+            ["kubectl", "rollout", "status", f"deployment/{deployment_name}", "-n", namespace,
              f"--timeout={timeout}s"],
              capture_output=True,
              text=True,
@@ -51,9 +66,9 @@ class K8sClient:
             return False
         return True
 
-    def get_replica_counts(self, deployment_name: str) -> tuple[int, int]:
+    def get_replica_counts(self, deployment_name: str, namespace: str = "default") -> tuple[int, int]:
         result = subprocess.run(
-            ["kubectl", "get", "deployment", deployment_name, "-o", "jsonpath={.status.readyReplicas}/{.spec.replicas}"],
+            ["kubectl", "get", "deployment", deployment_name, "-n", namespace, "-o", "jsonpath={.status.readyReplicas}/{.spec.replicas}"],
             capture_output=True,
             text=True,
             timeout=30,

@@ -17,6 +17,9 @@ from app.routes.auth import get_current_user
 from app.services.docker_service import DockerService
 from app.services.git_service import GitService
 from app.schemas.pipeline_schema import PipelineRunResponse
+from app.pipeline.deploy_stage import DeployStage
+from app.pipeline.verify_stage import VerifyStage
+from app.models.deployment import Deployment
 
 router = APIRouter(prefix="/pipelines", tags=["pipelines"])
 
@@ -65,13 +68,14 @@ def run_pipeline(
     db.refresh(run)
 
     context = {
+        "project":project,
         "repo_path": str(git.project_path(project_id)),
         "docker_image_name": image,
         "commit_sha": head["commit_sha"],
         "commit_date": head["committed_at"].isoformat(),
     }
 
-    stages = [BuildStage(docker), TestStage(), PushStage(docker)]
+    stages = [BuildStage(docker), TestStage(), PushStage(docker), DeployStage(), VerifyStage(),]
     result = PipelineRunner(stages).run(context)
 
     run.status = result["status"]
@@ -81,9 +85,34 @@ def run_pipeline(
     run.stage_results = json.dumps(result["results"])
     run.duration_seconds = result["duration_s"]
     run.finished_at = datetime.now(timezone.utc)
-    db.commit()
 
-    return {**result, "pipeline_run_id": run.id, "image": image}
+    # Only a run that reached the cluster has something to record. A run that died at Build must not create a phantom deployment.
+    deployment = None
+    if context.get("deployed_image"):
+        deployment = Deployment(
+            project_id=project.id,
+            version=context["commit_sha"][:7],
+            namespace=context.get("namespace"),
+            deployment_name=context.get("deployment_name"),
+            status=(
+                "success"
+                if result["status"] == PipelineState.SUCCESS.value
+                else "failed"
+            ),
+        )
+        db.add(deployment)
+
+    db.commit()
+    if deployment:
+        db.refresh(deployment)
+
+    return {
+        **result, 
+        "pipeline_run_id": run.id, 
+        "image": image,
+        "deployment_id": deployment.id if deployment else None,
+        "namespace": context.get("namespace"),
+    }
 
 @router.get("/runs/{project_id}", response_model=list[PipelineRunResponse])
 def list_pipeline_runs(

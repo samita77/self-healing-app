@@ -23,6 +23,7 @@ class DeploymentHealthService:
         deployment_name: str,
         ready: int,
         desired: int,
+        namespace: str = "default",
         consecutive_failures: int = 2,
         has_previous_version: bool = True,
         weights: dict | None = None,
@@ -48,7 +49,7 @@ class DeploymentHealthService:
                 desired=desired,
                 p95_ms=probe.p95_latency_ms,
             )
-            action_taken = self.rollback_engine.rollback(deployment_name)
+            action_taken = self.rollback_engine.rollback(deployment_name, namespace)
 
         return {
             "probe": probe,

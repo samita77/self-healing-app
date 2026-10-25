@@ -9,5 +9,8 @@ class Deployment(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     version = Column(String, nullable=False)
     status = Column(String, nullable=False) # pending, success, failed
+    # The Kubernetes identity this row refers to. Nullable because the three deployments created before the pipeline deployed anything have none.
+    namespace = Column(String, nullable=True)
+    deployment_name = Column(String, nullable=True)
     health_score = Column(Float, nullable=True)
     deployed_at = Column(DateTime(timezone=True), server_default=func.now())
