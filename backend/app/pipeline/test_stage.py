@@ -8,7 +8,7 @@ class TestStage(PipelineStage):
         super().__init__(name="Test")
 
     def execute(self, context:dict) -> bool:
-        repo_path = Path(context["repo_path"])
+        repo_path = Path(context["repo_path"]).resolve()
         test_dir = repo_path / "tests"
 
         if not test_dir.is_dir():
@@ -17,7 +17,7 @@ class TestStage(PipelineStage):
 
         print(f"[{self.name}] Running test suite in {repo_path}")
         result = subprocess.run(
-            ["node", "--test", str(test_dir)],
+            ["node", "--test"],
             cwd=str(repo_path),
             capture_output=True,
             text=True,

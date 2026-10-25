@@ -21,6 +21,9 @@ class GitService:
         )
     )
 
+    def __init__(self, workspace_dir: str = "./workspace"):
+        self.workspace_dir = Path(workspace_dir)
+
     def _validate_repo_url(self, repo_url: str) -> None:
         if not repo_url.startswith(self.ALLOWED_SCHEMES):
             raise ValueError(
