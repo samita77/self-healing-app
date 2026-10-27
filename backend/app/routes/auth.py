@@ -58,13 +58,13 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
             detail="An account with this email already exists",
         )
 
-    # Registration ALWAYS creates a developer. If this allowed choosing a role,
+    # Registration ALWAYS creates a user. If this allowed choosing a role,
     # anyone could make themselves an administrator.
     user = User(
         email=payload.email,
         full_name=payload.full_name,
         hashed_password=hash_password(payload.password),
-        role="developer",
+        role="user",
     )
     db.add(user)
     db.commit()
@@ -98,7 +98,7 @@ def me(user: User = Depends(get_current_user)):
 def require_admin(user: User = Depends(get_current_user)) -> User:
     """Guard for administrator-only endpoints.
 
-    Registration always creates a `developer`, so the admin role is rare by
+    Registration always creates a `user`, so the admin role is rare by
     construction. Anything that can change roles or view every tenant's data
     belongs behind this.
     """

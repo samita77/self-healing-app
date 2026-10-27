@@ -1,6 +1,6 @@
 """Creates the initial administrator account.
 
-Registration deliberately always creates a `developer`, so an admin can
+Registration deliberately always creates a `user`, so an admin can
 never be created through the HTTP API. This script is the only path.
 
 Usage:

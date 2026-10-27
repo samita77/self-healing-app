@@ -10,10 +10,10 @@ export default async function AdminPage() {
 
   if (!token) redirect("/login");
 
-  let role = "developer";
+  let role = "user";
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    role = payload.role || "developer";
+    role = payload.role || "user";
   } catch {}
 
   if (role !== "admin") redirect("/dashboard");

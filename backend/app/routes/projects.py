@@ -33,10 +33,10 @@ def list_projects(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Administrators see every tenant's projects; developers see only their own.
+    """Administrators see every tenant's projects; users see only their own.
 
     Filtering happens in the query rather than after fetching, so a
-    developer's response never contains another tenant's rows.
+    user's response never contains another tenant's rows.
     """
     query = db.query(Project)
     if current_user.role != "admin":

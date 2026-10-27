@@ -68,10 +68,10 @@ def list_deployments(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Administrators see every deployment; developers see only their own.
+    """Administrators see every deployment; users see only their own.
 
     Filtering is done in the query rather than after fetching, so a
-    developer's response never contains another tenant's rows.
+    user's response never contains another tenant's rows.
     """
     query = db.query(Deployment).join(Project)
 

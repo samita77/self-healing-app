@@ -23,7 +23,7 @@ export default async function RegisterPage() {
         </div>
 
         <p className="text-center text-xs text-slate-400">
-          New accounts are created as <span className="font-mono">developer</span>.
+          New accounts are created as <span className="font-mono">user</span>.
         </p>
       </div>
     </main>
