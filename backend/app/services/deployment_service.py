@@ -2,7 +2,10 @@ from app.deployment.post_deploy_verifier import PostDeployVerifier
 from app.health.failure_classifier import FailureClassifier
 from app.models.health_check import HealthCheck
 from app.models.rollback_event import RollbackEvent
+from app.models.deployment import Deployment
 from app.rollback.rollback_engine import RollbackEngine
+from app.health.trend_detector import TrendDetector
+from app.rollback.rollback_selector import RollbackSelector
 
 
 class DeploymentHealthService:
@@ -12,10 +15,12 @@ class DeploymentHealthService:
     server, a Kubernetes cluster or a database.
     """
 
-    def __init__(self, verifier=None, rollback_engine=None, classifier=None):
+    def __init__(self, verifier=None, rollback_engine=None, classifier=None,
+                 trend_detector=None):
         self.verifier = verifier or PostDeployVerifier()
         self.rollback_engine = rollback_engine or RollbackEngine()
         self.classifier = classifier or FailureClassifier()
+        self.trend_detector = trend_detector or TrendDetector()
 
     def check_and_heal(
         self,
@@ -27,6 +32,9 @@ class DeploymentHealthService:
         consecutive_failures: int = 2,
         has_previous_version: bool = True,
         weights: dict | None = None,
+        db=None,
+        deployment_id: int | None = None,
+        project_id: int | None = None,
     ) -> dict:
         readiness_score = (ready / desired * 100) if desired else 0.0
         probe, score = self.verifier.check_and_score(url, readiness_score, weights)
@@ -37,6 +45,15 @@ class DeploymentHealthService:
             consecutive_failures,
             has_previous_version,
         )
+
+        # Update EWMA trend detector with latest probe metrics.
+        trend_result = None
+        if db is not None and deployment_id is not None:
+            trend_result = self.trend_detector.update(
+                deployment_id,
+                probe.p95_latency_ms,
+                probe.error_rate,
+            )
 
         # Only classify when a rollback is actually about to happen. On a
         # healthy deployment there is nothing to diagnose.
@@ -49,7 +66,23 @@ class DeploymentHealthService:
                 desired=desired,
                 p95_ms=probe.p95_latency_ms,
             )
-            action_taken = self.rollback_engine.rollback(deployment_name, namespace)
+            # Select rollback target: known-good version first, then fallback.
+            if db is not None and project_id is not None:
+                selector = RollbackSelector(db)
+                target, selector_reason = selector.choose(
+                    project_id, deployment_id
+                )
+                action_taken = self.rollback_engine.rollback(
+                    deployment_name,
+                    namespace,
+                    target_deployment_name=target.deployment_name if target else None,
+                    target_namespace=target.namespace if target else None,
+                )
+                combined_reason = (
+                    f"{failure_reason}; {selector_reason}"
+                    if selector_reason else failure_reason
+                )
+                failure_reason = combined_reason
 
         return {
             "probe": probe,
@@ -57,6 +90,7 @@ class DeploymentHealthService:
             "decision": decision,
             "failure_reason": failure_reason,
             "action_taken": action_taken,
+            "trend": trend_result,
         }
 
     @staticmethod

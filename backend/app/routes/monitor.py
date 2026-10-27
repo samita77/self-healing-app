@@ -54,6 +54,9 @@ def check_and_heal(
         desired=desired,
         consecutive_failures=2,
         has_previous_version=has_previous,
+        db=db,
+        deployment_id=deployment_id,
+        project_id=owned.project_id,
     )
 
     record = service.persist_health_check(
@@ -74,4 +77,5 @@ def check_and_heal(
         "decision": result["decision"],
         "failure_reason": result["failure_reason"],
         "action_taken": result["action_taken"],
+        "trend": result.get("trend"),
     }

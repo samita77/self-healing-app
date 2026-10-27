@@ -35,7 +35,10 @@ class RollbackEngine:
                 "consecutive_failures": consecutive_failures}
 
 
-    def rollback(self, deployment_name: str, namespace: str = "default") -> dict:
+    def rollback(self, deployment_name: str, namespace: str = "default", target_deployment_name: str | None = None, target_namespace: str | None = None) -> dict:
         started = time.monotonic()
-        success = self.k8s_client.rollback_deployment(deployment_name, namespace)
+        # If a spacific target was selected by RollbackSelector, roll back that deployment instead of the currently failing one.
+        name = target_deployment_name or deployment_name
+        ns = target_namespace or namespace
+        success = self.k8s_client.rollback_deployment(name, ns)
         return {"rolled_back": success, "duration_s": round(time.monotonic() - started, 2)}
