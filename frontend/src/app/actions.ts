@@ -166,3 +166,61 @@ export async function logout(): Promise<void> {
   store.delete("token");
   revalidatePath("/");
 }
+
+// ---------- project update/delete ----------
+
+export async function updateProject(
+  projectId: number,
+  prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const repo_url = String(formData.get("repo_url") ?? "").trim();
+  const container_port = Number(formData.get("container_port") ?? 5000);
+  const health_path = String(formData.get("health_path") ?? "/").trim() || "/";
+  const replicas = Number(formData.get("replicas") ?? 2);
+
+  const payload: Record<string, string | number> = {};
+  if (repo_url) payload.repo_url = repo_url;
+  payload.container_port = container_port;
+  if (health_path) payload.health_path = health_path;
+  payload.replicas = replicas;
+
+  const res = await fetch(`${BACKEND}/projects/${projectId}`, {
+    method: "PUT",
+    headers: await authHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (res.status === 401) {
+    return { ok: false, error: "Your session expired. Please log in again." };
+  }
+  if (!res.ok) {
+    return { ok: false, error: `Update failed (HTTP ${res.status})` };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/projects/${projectId}`);
+  return { ok: true, error: "" };
+}
+
+export async function deleteProject(
+  prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const projectId = Number(formData.get("project_id"));
+
+  const res = await fetch(`${BACKEND}/projects/${projectId}`, {
+    method: "DELETE",
+    headers: await authHeaders(),
+  });
+
+  if (res.status === 401) {
+    return { ok: false, error: "Your session expired. Please log in again." };
+  }
+  if (!res.ok) {
+    return { ok: false, error: `Delete failed (HTTP ${res.status})` };
+  }
+
+  revalidatePath("/dashboard");
+  return { ok: true, error: "" };
+}

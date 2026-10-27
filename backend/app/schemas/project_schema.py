@@ -26,3 +26,11 @@ class ProjectResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ProjectUpdate(BaseModel):
+    repo_url: str | None = None
+    container_port: int | None = None
+    health_path: str | None = None
+    replicas: int | None = None
+    secret_refs: list[str] | None = None

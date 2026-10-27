@@ -2,6 +2,7 @@ import { getDeployments, getPipelineRuns, getProject } from "@/lib/api";
 import { Deployment, PipelineRun } from "@/lib/types";
 import { notFound } from "next/navigation";
 import { runPipeline } from "./action";
+import DeleteButton from "./DeleteButton";
 import SubmitButton from "./SubmitButton";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -35,6 +36,16 @@ async function ProjectBody({
                 <form action={runPipeline.bind(null, project.id)} className="pt-2">
                     <SubmitButton />
                 </form>
+
+                <div className="flex items-center gap-3 pt-2">
+                    <Link
+                        href={`/projects/${project.id}/edit`}
+                        className="px-4 py-2 rounded-lg border border-slate-600 text-sm hover:bg-slate-700"
+                    >
+                        Edit
+                    </Link>
+                    <DeleteButton projectId={project.id} />
+                </div>
             </section>
 
             <section className="space-y-3">
