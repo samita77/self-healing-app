@@ -5,7 +5,7 @@ from datetime import datetime
 class ProjectCreate(BaseModel):
     name: str
     repo_url: str
-    docker_image_name: str
+    docker_image_name: str | None = None
     container_port: int = 5000
     health_path: str = "/"
     replicas: int = 2
@@ -16,7 +16,7 @@ class ProjectResponse(BaseModel):
     id: int
     name: str
     repo_url: str
-    docker_image_name: str
+    docker_image_name: str | None = None
     owner_id: int
     created_at: datetime
     container_port: int

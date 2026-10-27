@@ -1,67 +1,50 @@
-import HealthGauge from "@/components/HealthGauge";
-import { getProjects } from "@/lib/api";
-import type { Project } from "@/lib/types";
 import Link from "next/link";
-import { Suspense } from "react";
-import ProjectForm from "./ProjectForm";
 
-// Fetches uncached data (projects), so navigation is declared non-instant.
-export const instant = false;
-
-function ProjectSkeleton() {
+export default function LandingPage() {
   return (
-    <ul className="space-y-2" aria-busy="true" aria-label="Loading projects">
-      {[0, 1, 2].map((i) => (
-        <li
-          key={i}
-          className="h-[66px] rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse" />
-      ))}
-    </ul>
-  );
-}
-
-async function ProjectList() {
-  const projects = await getProjects();
-
-  if (projects.length === 0) {
-    return (
-      <p className="text-sm text-slate-400">
-        No projects yet. Register one to run your first pipeline.
-      </p>
-    );
-  }
-
-  return (
-    <ul className="space-y-2">
-      {projects.map((p: Project) => (
-        <li key={p.id}>
-          <Link
-            href={`/projects/${p.id}`}
-            className="block rounded-lg border border-slate-600 bg-[#1B2336] p-4 flex justify-between items-center hover:border-slate-400">
-              <span className="text-sm">{p.name}</span>
-              <span className="font-mono text-xs text-slate-400">{p.repo_url}</span>
-            </Link>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-export default function Home() {
-  return (
-    <main className="p-10 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Projects</h1>
-        <Link
-        href="/deployments" className="text-xs text-slate-400 underline underline-offset-2">
-          View all deployments
+    <main className="min-h-screen flex flex-col bg-[#0F172A] text-[#F8FAFC]">
+      <nav className="border-b border-[#475569] px-10 py-4 flex justify-between items-center">
+        <Link href="/" className="flex items-center gap-2 font-semibold text-xl">
+          <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-full bg-[#22C55E]" />
+          <span>Self-Healing DevOps</span>
         </Link>
-      </div>
+        <div className="flex gap-3">
+          <Link href="/login" className="px-4 py-2 rounded-lg border border-slate-600 text-sm">Log in</Link>
+          <Link href="/register" className="px-4 py-2 rounded-lg border border-[#22C55E] text-[#22C55E] text-sm">Sign up</Link>
+        </div>
+      </nav>
 
-        <ProjectForm />
-        <Suspense fallback={<ProjectSkeleton />}>
-          <ProjectList />
-        </Suspense>
+      <section className="flex-1 flex flex-col items-center justify-center px-10 text-center">
+        <h1 className="text-4xl font-bold mb-4">Self-Healing DevOps Platform</h1>
+        <p className="text-lg text-slate-400 max-w-2xl mb-8">
+          Automated deployment, health scoring, and rollback for containerised applications.
+          Clone a repo, build and push an image, deploy to Kubernetes, score health — and auto-rollback if it degrades.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="rounded-lg border border-slate-700 bg-[#1B2336] p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">Auto-deploy</h3>
+            <p className="text-sm text-slate-300">Clones your repo, builds a container image, runs tests, and pushes to the local registry.</p>
+          </div>
+          <div className="rounded-lg border border-slate-700 bg-[#1B2336] p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">Health scoring</h3>
+            <p className="text-sm text-slate-300">Weighted multi-component score with p95 response time and exponential decay.</p>
+          </div>
+          <div className="rounded-lg border border-slate-700 bg-[#1B2336] p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">Auto-rollback</h3>
+            <p className="text-sm text-slate-300">Two-consecutive-failure guard prevents harmful automation. Rolls back to known-good versions.</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <Link href="/login" className="inline-block px-6 py-3 rounded-lg border border-[#22C55E] bg-[#22C55E] text-[#0F172A] font-semibold text-sm">Get started</Link>
+          <p className="text-xs text-slate-500">Already have an account? <Link href="/login" className="underline">Log in</Link></p>
+        </div>
+      </section>
+
+      <footer className="border-t border-[#475569] py-4 text-xs text-slate-500 text-center">
+        CACS452 Project III · Self-Healing DevOps Platform
+      </footer>
     </main>
   );
 }

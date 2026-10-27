@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
  * The token cookie is httpOnly, but middleware reads the raw Cookie
  * header, so it is visible here.
  */
-const PUBLIC_PATHS = ["/login", "/register"];
+const PUBLIC_PATHS = ["/", "/login", "/register"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

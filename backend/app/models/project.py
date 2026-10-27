@@ -9,8 +9,9 @@ class Project(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     repo_url = Column(String, nullable=False)
-    # Kept for compatibility with the create form, but Dockerservice.build_tag derives the tag from name, not from this. Do not rely on it.
-    docker_image_name = Column(String, nullable=False)
+    # Image tag is derived from project name by DockerService.build_tag.
+    # Kept for display only; nullable since the create form no longer asks for it.
+    docker_image_name = Column(String, nullable=True)
     # --- deployment configuration -------------------------------------
     # These four are what make the manifest generic. Without them the platform can only deploy applications that happen to look like the first one it was tested against.
 

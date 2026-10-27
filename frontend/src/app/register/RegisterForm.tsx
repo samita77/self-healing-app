@@ -15,7 +15,7 @@ export default function RegisterForm() {
   const router = useRouter();
 
   useEffect(() => {
-    if (state.ok) router.push("/");
+    if (state.ok) router.push("/dashboard");
   }, [state.ok, router]);
 
   return (

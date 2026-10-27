@@ -11,7 +11,7 @@ export interface Project {
     id: number;
     name: string;
     repo_url: string;
-    docker_image_name: string;
+    docker_image_name?: string | null;
     created_at: string;
 }
 

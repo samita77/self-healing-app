@@ -28,7 +28,9 @@ async function ProjectBody({
             <section className="rounded-lg border border-slate-600 bg-[#1B2336] p-6 space-y-2">
                 <h2 className="text-sm font-semibold">Repository</h2>
                 <p className="font-mono text-xs text-slate-300 break-all">{project.repo_url}</p>
-                <p className="font-mono text-xs text-slate-400">{project.docker_image_name}</p>
+                {project.docker_image_name && (
+                  <p className="font-mono text-xs text-slate-400">{project.docker_image_name}</p>
+                )}
 
                 <form action={runPipeline.bind(null, project.id)} className="pt-2">
                     <SubmitButton />

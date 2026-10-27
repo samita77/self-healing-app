@@ -33,8 +33,7 @@ export async function createProject(
   const payload = {
     name,
     repo_url: String(formData.get("repo_url") ?? "").trim(),
-    // Still a required column, but the pipeline derives the image tag from the project name. Asking for it was field that lied.
-    docker_image_name: name,
+    // Image tag is derived from project name by DockerService.build_tag.
     container_port: Number(formData.get("container_port") ?? 5000),
     health_path: String(formData.get("health_path") ?? "/").trim() || "/",
   };
