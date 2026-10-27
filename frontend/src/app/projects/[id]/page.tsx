@@ -1,8 +1,9 @@
-import { getDeployments, getPipelineRuns, getProject } from "@/lib/api";
-import { Deployment, PipelineRun } from "@/lib/types";
+import { getDeployments, getProject } from "@/lib/api";
+import { Deployment } from "@/lib/types";
 import { notFound } from "next/navigation";
 import { runPipeline } from "./action";
 import DeleteButton from "./DeleteButton";
+import PipelineRunsPoller from "./PipelineRunsPoller";
 import SubmitButton from "./SubmitButton";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -16,10 +17,9 @@ async function ProjectBody({
 }: {
     projectId: number;
 }) {
-    const [project, deployments, runs] = await Promise.all([
+    const [project, deployments] = await Promise.all([
         getProject(projectId).catch(() => null),
         getDeployments(projectId).catch(() => [] as Deployment[]),
-        getPipelineRuns(projectId).catch(() => [] as PipelineRun[]),
     ]);
 
     if (!project) notFound();
@@ -50,43 +50,7 @@ async function ProjectBody({
 
             <section className="space-y-3">
                 <h2 className="text-sm font-semibold">Pipeline runs</h2>
-
-                {runs.length === 0 ? (
-                    <p className="text-sm text-slate-400">No pipeline runs yet.</p>
-                ) : (
-                    runs.slice(0, 5).map((r) => (
-                        <div
-                            key={r.id}
-                            className="rounded-lg border border-slate-600 bg-[#1B2336] p-4"
-                        >
-                            <div className="flex items-center justify-between">
-                                <span className="font-mono text-xs">{r.commit_sha.slice(0, 7)}</span>
-                                <span
-                                    className={`text-xs uppercase ${r.status === "success" ? "text-green-500" : "text-red-500"
-                                        }`}
-                                >
-                                    {r.status}
-                                </span>
-                            </div>
-
-                            <ul className="mt-3 space-y-1">
-                                {r.stage_results.map((s) => (
-                                    <li key={s.stage} className="flex items-center gap-2 text-xs">
-                                        <span className={s.success ? "text-green-500" : "text-red-500"}>
-                                            {s.success ? "PASS" : "FAIL"}
-                                        </span>
-                                        <span className="text-slate-300">{s.stage}</span>
-                                        {s.duration_s != null && (
-                                            <span className="font-mono text-slate-400">
-                                                {s.duration_s}s
-                                            </span>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))
-                )}
+                <PipelineRunsPoller projectId={project.id} />
             </section>
 
             <section className="space-y-3">
