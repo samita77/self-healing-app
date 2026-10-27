@@ -18,15 +18,18 @@ function Submit() {
 
 export default function HealthCheckForm({
   action,
+  defaultUrl = "",
 }: {
   action: (formData: FormData) => Promise<void>;
+  defaultUrl?: string;
 }) {
   return (
     <form action={action} className="flex gap-2">
       <input
         name="url"
+        defaultValue={defaultUrl}
         required
-        placeholder="http://192.168.49.2:30080/health"
+        placeholder="http://<minikube-ip>:<nodePort>/health"
         className="w-full rounded-lg border border-slate-600 bg-[#0F172A] px-3 py-2 font-mono text-xs focus:border-green-500 focus:outline-none"
       />
       <Submit />

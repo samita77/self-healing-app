@@ -149,7 +149,14 @@ async function DeploymentBody({
               {deployment.namespace} / {deployment.deployment_name}
             </p>
           </div>
-          <HealthCheckForm action={checkHealth.bind(null, deployment.id)} />
+          <HealthCheckForm
+            action={checkHealth.bind(null, deployment.id)}
+            defaultUrl={
+              deployment.node_port
+                ? `http://localhost:${deployment.node_port}/health`
+                : ""
+            }
+          />
         </section>
       ) : (
         <p className="text-xs text-slate-400">

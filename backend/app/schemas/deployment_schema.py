@@ -14,6 +14,7 @@ class DeploymentResponse(BaseModel):
     status: str
     namespace: Optional[str] = None
     deployment_name: Optional[str] = None
+    node_port: Optional[int] = None
     health_score: Optional[float] = None
     deployed_at: datetime
 

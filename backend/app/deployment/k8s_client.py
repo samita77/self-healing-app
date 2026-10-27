@@ -78,3 +78,19 @@ class K8sClient:
             return int(ready), int(desired)
         except (ValueError, AttributeError):
             return 0, 0
+
+    def get_node_port(self, service_name: str, namespace: str = "default") -> int | None:
+        """Returns the NodePort assigned to a Service, or None if not set."""
+        result = subprocess.run(
+            [
+                "kubectl", "get", "svc", service_name, "-n", namespace,
+                "-o", "jsonpath={.spec.ports[0].nodePort}",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        try:
+            return int(result.stdout.strip())
+        except (ValueError, AttributeError):
+            return None

@@ -22,6 +22,7 @@ export interface Deployment {
     status: string;
     namespace?: string | null;
     deployment_name?: string | null;
+    node_port?: number | null;
     health_score: number | null;
     deployed_at: string;
 }

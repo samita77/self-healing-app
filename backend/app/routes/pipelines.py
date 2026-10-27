@@ -94,6 +94,7 @@ def run_pipeline(
             version=context["commit_sha"][:7],
             namespace=context.get("namespace"),
             deployment_name=context.get("deployment_name"),
+            node_port=context.get("node_port"),
             status=(
                 "success"
                 if result["status"] == PipelineState.SUCCESS.value

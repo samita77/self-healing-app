@@ -12,5 +12,7 @@ class Deployment(Base):
     # The Kubernetes identity this row refers to. Nullable because the three deployments created before the pipeline deployed anything have none.
     namespace = Column(String, nullable=True)
     deployment_name = Column(String, nullable=True)
+    # NodePort assigned by k8s for the Service; used to build the health check URL.
+    node_port = Column(Integer, nullable=True)
     health_score = Column(Float, nullable=True)
     deployed_at = Column(DateTime(timezone=True), server_default=func.now())

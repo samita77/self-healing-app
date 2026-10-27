@@ -19,6 +19,12 @@ class DeployStage(PipelineStage):
         docs = self.builder.build(project, context["docker_image_name"])
         self.client.apply_docs(docs)
 
+        # Fetch the NodePort assigned by k8s so the health check URL can be
+        # pre-filled on the dashboard.
+        node_port = self.client.get_node_port(name, name)
+        if node_port:
+            context["node_port"] = node_port
+
         context["deployment_name"] = name
         context["namespace"] = name
         context["deployed_image"] = context["docker_image_name"]
