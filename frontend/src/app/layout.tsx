@@ -75,6 +75,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   <NavLink href="/">Projects</NavLink>
                   <NavLink href="/deployments">Deployments</NavLink>
                   <NavLink href="/metrics">Metrics</NavLink>
+              <NavLink href="/dora">DORA</NavLink>
                   {user?.role === "admin" && (
                     <NavLink href="/admin">Admin</NavLink>
                   )}
