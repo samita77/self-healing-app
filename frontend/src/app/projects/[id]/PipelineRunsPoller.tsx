@@ -57,7 +57,12 @@ export default function PipelineRunsPoller({
           className="rounded-lg border border-slate-600 bg-[#1B2336] p-4"
         >
           <div className="flex items-center justify-between">
-            <span className="font-mono text-xs">{r.commit_sha.slice(0, 7)}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs">{r.commit_sha.slice(0, 7)}</span>
+              <span className="text-xs text-slate-500">
+                {r.started_at ? new Date(r.started_at).toLocaleString() : "-"}
+              </span>
+            </div>
             <span
               className={`text-xs uppercase ${
                 r.status === "success" ? "text-green-500" : "text-red-500"
