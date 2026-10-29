@@ -1,4 +1,4 @@
-import { ScoreComponents } from "@/lib/types";
+import type { ScoreComponents } from "@/lib/types";
 
 const ROWS = [
     {
@@ -6,7 +6,7 @@ const ROWS = [
         label: "Availability",
         weight: 0.4,
         hint: "successful probes / total probes",
-    }, 
+    },
     {
         key: "R_response_time",
         label: "Response time",

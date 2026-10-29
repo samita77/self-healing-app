@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Self-Healing DevOps Platform — Frontend
 
-## Getting Started
+React single-page application for the Self-Healing DevOps Platform. It talks to
+the FastAPI backend at `http://localhost:8000`.
 
-First, run the development server:
+## Stack
+
+- React 19 + TypeScript
+- Vite 8
+- React Router 8 (client-side routing)
+- TanStack Query 5 (caching, polling, mutations)
+- Tailwind CSS 4
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The dev server is pinned to **port 3000** because the backend CORS allowlist
+only permits `http://localhost:3000`. Open <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The backend must be running separately:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cd ../backend
+uvicorn app.main:app --reload --port 8000
+```
 
-## Learn More
+### Environment
 
-To learn more about Next.js, take a look at the following resources:
+Configuration lives in `.env.local`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Purpose | Default |
+|---|---|---|
+| `VITE_API_BASE_URL` | Backend origin | `http://localhost:8000` |
+| `VITE_GRAFANA_URL` | Grafana base URL for the metrics iframe | *(empty — shows a hint)* |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Only `VITE_`-prefixed variables are exposed to the browser.
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Script | Action |
+|---|---|
+| `npm run dev` | Vite dev server on `:3000` |
+| `npm run build` | Type-check, then build to `dist/` |
+| `npm run preview` | Serve the production build on `:3000` |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | ESLint |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Routes
+
+| Path | Access | Page |
+|---|---|---|
+| `/` | public | Landing (redirects signed-in users to the dashboard) |
+| `/login`, `/register` | public | Authentication |
+| `/dashboard` | signed in | Project list + registration |
+| `/projects/:id` | signed in | Project detail, pipeline runs, deployments |
+| `/projects/:id/edit` | signed in | Edit repository settings |
+| `/deployments` | signed in | All deployments |
+| `/deployments/:id` | signed in | Health gauge, check history, rollbacks |
+| `/metrics` | signed in | Grafana iframe |
+| `/dora` | signed in | DORA metrics |
+| `/admin`, `/users` | admin | Administration |
+
+## Authentication
+
+Login returns a JWT which is stored in `localStorage` and sent as
+`Authorization: Bearer <token>` on every request. The token expires after one
+hour; any `401` clears the session and redirects to `/login`.
+
+Client-side route guards (`ProtectedRoute`, `AdminRoute`) are a UX convenience —
+the backend remains the authorization boundary and rejects invalid tokens (401)
+and non-admin users (403).
+
+## Deployment
+
+`npm run build` produces a static bundle in `dist/`. Because routing is
+client-side, the host must rewrite unknown paths to `index.html` (SPA fallback),
+e.g. nginx `try_files $uri /index.html;`. `npm run preview` does this locally.

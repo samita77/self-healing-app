@@ -9,8 +9,8 @@ const VARIANT: Record<Status, string> = {
 export default function StatusBadge({ status }: { status: Status }) {
     return (
         <span className={`status-badge ${VARIANT[status]}`}>
-            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-current"/>
+            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-current" />
             {status}
         </span>
-    )
+    );
 }

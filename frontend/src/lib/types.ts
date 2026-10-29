@@ -1,5 +1,7 @@
 export type Status = "SUCCESSFUL" | "WARNING" | "FAILED";
 
+export type Role = "admin" | "user";
+
 export interface ScoreComponents {
     S_availability: number;
     R_response_time: number;
@@ -12,7 +14,11 @@ export interface Project {
     name: string;
     repo_url: string;
     docker_image_name?: string | null;
+    owner_id?: number;
     created_at: string;
+    container_port?: number;
+    health_path?: string;
+    replicas?: number;
 }
 
 export interface Deployment {
@@ -27,7 +33,7 @@ export interface Deployment {
     deployed_at: string;
 }
 
-export interface HealthCheck{
+export interface HealthCheck {
     id: number;
     deployment_id: number;
     available: boolean;
@@ -36,7 +42,7 @@ export interface HealthCheck{
     health_score: number;
     status: Status;
     components: ScoreComponents | null;
-    checked_at: String;
+    checked_at: string;
 }
 
 export interface RollbackEvent {
@@ -72,6 +78,20 @@ export interface User {
     id: number;
     email: string;
     full_name: string;
-    role: "admin" | "developer";
+    role: Role;
     created_at: string;
+}
+
+export interface DoraMetrics {
+    deployment_frequency: number;
+    lead_time_hours: number;
+    mttr_hours: number;
+    change_failure_rate: number;
+    note?: string;
+}
+
+export interface LoginResponse {
+    access_token: string;
+    token_type: string;
+    user: User;
 }

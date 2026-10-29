@@ -10,7 +10,7 @@
 **Generated:** 2026-10-16 11:48:13
 **Category:** Developer Tool / IDE
 **Design Dials:** Density 8/10 (Dense / Dashboard)
-**Stack:** Next.js (TypeScript) + Tailwind CSS
+**Stack:** React 19 SPA (Vite + React Router) + Tailwind CSS
 
 ---
 

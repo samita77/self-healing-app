@@ -14,7 +14,7 @@
 | **Core contribution** | A weighted multi-component health-scoring algorithm with tunable parameters, plus decision logic that prevents harmful automatic actions. |
 | **Environment** | 7 GB RAM (hard constraint) · Minikube · Supabase PostgreSQL |
 | **Backend** | FastAPI + SQLAlchemy · Alembic migrations · JWT auth · ownership scoping |
-| **Frontend** | Next.js 16 + TypeScript + Tailwind v4 · 7 pages · 6 components |
+| **Frontend** | React 19 SPA (Vite 8) + TypeScript + Tailwind v4 · React Router 8 · TanStack Query 5 · 11 routes · 12 components |
 | **Monitoring** | Prometheus + Grafana inside Minikube |
 
 ---
@@ -27,7 +27,7 @@ This is the single most important idea to hold onto. Getting it backwards is the
 ┌─────────────────────────────────────────────────┐
 │  THE PLATFORM — what you build and are graded on│
 │                                                 │
-│  FastAPI backend  +  Next.js dashboard          │
+│  FastAPI backend  +  React dashboard            │
 │  Pipeline Engine  ·  Health Scorer              │
 │  Rollback Engine  ·  Failure Classifier         │
 └──────────────────┬──────────────────────────────┘
@@ -265,7 +265,7 @@ Approximate memory footprint of the full stack:
 | Component | RAM |
 |---|---|
 | Minikube control plane and nodes | ~3.0 GB |
-| Next.js dev server | ~0.5 GB |
+| Vite dev server | ~0.5 GB |
 | Prometheus + Grafana | ~0.3 GB |
 | Backend (uvicorn) | ~0.2 GB |
 | Application pods | ~0.26 GB |
