@@ -21,8 +21,19 @@ class PostDeployVerifier:
         result["pods"] = {"ready": ready, "desired": desired}
         return result
 
-    def check_and_score(self, url: str, pod_readiness: float = 100.0, weights=None):
-        probe = self.monitor.run_window(url, self.window_s, self.interval_s)
+    def check_and_score(
+        self,
+        url: str,
+        pod_readiness: float = 100.0,
+        weights=None,
+        duration_s: int | None = None,
+        interval_s: int | None = None,
+    ):
+        probe = self.monitor.run_window(
+            url,
+            self.window_s if duration_s is None else duration_s,
+            self.interval_s if interval_s is None else interval_s,
+        )
         scorer = HealthScorer(weights=weights) if weights else self.scorer
         return probe, scorer.score(probe, pod_readiness)
 

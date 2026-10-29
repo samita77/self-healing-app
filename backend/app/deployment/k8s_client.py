@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 import yaml
@@ -94,3 +95,38 @@ class K8sClient:
             return int(result.stdout.strip())
         except (ValueError, AttributeError):
             return None
+
+    def get_minikube_ip(self) -> str:
+        """Resolve the active local Minikube node address for host-side probes."""
+        configured = os.getenv("MINIKUBE_IP", "").strip()
+        if configured:
+            return configured
+        result = subprocess.run(
+            ["minikube", "ip"], capture_output=True, text=True, timeout=10
+        )
+        address = result.stdout.strip()
+        if result.returncode != 0 or not address:
+            detail = result.stderr.strip() or "Minikube did not return a node IP"
+            raise RuntimeError(detail)
+        return address
+    def list_pods(self, namespace: str, deployment_name: str) -> list[dict]:
+        import json
+        result = subprocess.run(
+            ["kubectl", "get", "pods", "-n", namespace, "-l", f"app={deployment_name}", "-o", "json"],
+            capture_output=True, text=True, timeout=30,
+        )
+        if result.returncode:
+            raise RuntimeError(result.stderr[-1000:] or "Could not list pods")
+        data = json.loads(result.stdout or "{}")
+        return [{"name": item["metadata"]["name"], "phase": item.get("status", {}).get("phase", "Unknown"),
+                 "containers": [c["name"] for c in item.get("spec", {}).get("containers", [])]}
+                for item in data.get("items", [])]
+
+    def pod_logs(self, namespace: str, pod: str, container: str, tail: int = 500) -> str:
+        result = subprocess.run(
+            ["kubectl", "logs", pod, "-n", namespace, "-c", container, f"--tail={tail}", "--timestamps=true"],
+            capture_output=True, text=True, timeout=30,
+        )
+        if result.returncode:
+            raise RuntimeError(result.stderr[-1000:] or "Could not fetch pod logs")
+        return result.stdout[-200_000:]

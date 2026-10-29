@@ -33,6 +33,14 @@ export interface Deployment {
     deployed_at: string;
 }
 
+export interface RuntimeLogs {
+  deployment_id?: number;
+  pods: { name: string; phase: string; containers: string[] }[];
+  pod?: string;
+  container?: string;
+  logs: string | null;
+}
+
 export interface HealthCheck {
     id: number;
     deployment_id: number;

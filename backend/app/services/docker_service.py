@@ -11,7 +11,7 @@ class DockerService:
         # every deployed version has its own permanent tag.
         return f"{self.registry}/{slugify(project_name)}:{commit_sha[:7]}"
 
-    def build(self, repo_path: str, image: str) -> bool:
+    def build(self, repo_path: str, image: str, on_output=None) -> bool:
         print(f"[DockerService] Building {image} from {repo_path}")
         result = subprocess.run(
             ["docker", "build", "-t", image, repo_path],
@@ -19,13 +19,14 @@ class DockerService:
             text=True,
             timeout=900,
         )
+        if on_output: on_output((result.stdout or "") + (result.stderr or ""))
         if result.returncode != 0:
             print(f"[DockerService] build FAILED:\n{result.stderr[-2000:]}")
             return False
         print(f"[DockerService] build OK")
         return True
 
-    def push(self, image: str) -> bool:
+    def push(self, image: str, on_output=None) -> bool:
         print(f"[DockerService] Pushing {image}")
         result = subprocess.run(
             ["docker", "push", image],
@@ -33,6 +34,7 @@ class DockerService:
             text=True,
             timeout=300,
         )
+        if on_output: on_output((result.stdout or "") + (result.stderr or ""))
         if result.returncode != 0:
             print(f"[DockerSerivce] push FAILED:\n{result.stderr[-2000:]}")
             return False

@@ -6,7 +6,7 @@ function UserTableSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="h-10 rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse"
+          className="h-10 rounded-lg bg-card border border-border animate-pulse"
         />
       ))}
     </div>
@@ -17,27 +17,27 @@ export default function UsersPage() {
   const { data: users, isLoading, isError } = useUsers();
 
   return (
-    <main className="p-10 space-y-6">
+    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <div>
-        <h1 className="text-2xl font-semibold">Users</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <h1 className="text-xl font-semibold tracking-tight">Users</h1>
+        <p className="mt-1 text-sm text-ink-muted">
           Every account registered with the platform. Administrator view.
         </p>
       </div>
 
-      <section className="rounded-lg border border-slate-600 bg-[#1B2336] p-6">
+      <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
         {isLoading ? (
           <UserTableSkeleton />
         ) : isError ? (
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-failed">
             Could not load users. An administrator account is required.
           </p>
         ) : !users || users.length === 0 ? (
-          <p className="text-sm text-slate-400">No accounts registered yet.</p>
+          <p className="text-sm text-ink-muted">No accounts registered yet.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-slate-400">
+              <tr className="text-left text-xs uppercase tracking-wide text-ink-muted">
                 <th scope="col" className="py-2">Name</th>
                 <th scope="col" className="py-2">Email</th>
                 <th scope="col" className="py-2">Role</th>
@@ -46,21 +46,21 @@ export default function UsersPage() {
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="border-t border-[#272F42]">
+                <tr key={u.id} className="border-t border-border">
                   <td className="py-2.5">{u.full_name}</td>
-                  <td className="py-2.5 font-mono text-xs text-slate-300">
+                  <td className="py-2.5 font-mono text-xs text-ink-muted">
                     {u.email}
                   </td>
                   <td className="py-2.5">
                     <span
                       className={`text-xs uppercase ${
-                        u.role === "admin" ? "text-amber-500" : "text-slate-400"
+                        u.role === "admin" ? "text-warning" : "text-ink-muted"
                       }`}
                     >
                       {u.role}
                     </span>
                   </td>
-                  <td className="py-2.5 text-right font-mono text-xs text-slate-400">
+                  <td className="py-2.5 text-right font-mono text-xs text-ink-muted">
                     {u.created_at.slice(0, 10)}
                   </td>
                 </tr>

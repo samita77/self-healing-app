@@ -5,19 +5,31 @@
 @theme {
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", monospace;
-}
 
-:root {
-  --bg: #0F172A;
-  --card: #1B2336;
-  --muted: #272F42;
-  --border: #475569;
-  --text: #F8FAFC;
-  --text-mut: #94A3B8;
+  /* Semantic surfaces adapt to the selected color scheme. */
+  --color-page: #ffffff;
+  --color-surface: #f8fafc;
+  --color-card: #ffffff;
+  --color-border: #e2e8f0;
 
-  --status-healthy: #22C55E;
-  --status-warning: #F59E0B;
-  --status-failed: #EF4444;
+  /* Text */
+  --color-ink: #0f172a;
+  --color-ink-muted: #64748b;
+
+  /* Accent + status semantics. The same hexes live in src/lib/chartTheme.ts
+     so ECharts renders stay in sync with the Tailwind utilities. */
+  --color-primary: #1e40af;
+  --color-primary-hover: #1e3a8a;
+  --color-healthy: #16a34a;
+  --color-warning: #f59e0b;
+  --color-failed: #dc2626;
+  --color-info: #1e40af;
+  --color-primary-subtle: #eff6ff;
+  --color-primary-border: #bfdbfe;
+  --color-healthy-subtle: #f0fdf4;
+  --color-warning-subtle: #fffbeb;
+  --color-failed-subtle: #fef2f2;
+  --color-neutral-subtle: #f1f5f9;
 }
 
 html,
@@ -27,22 +39,42 @@ body,
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: var(--color-page);
+  color: var(--color-ink);
   font-family: var(--font-sans);
 }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid currentColor;
+* { box-sizing: border-box; }
+
+button, input, textarea, select { font: inherit; }
+
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+::selection {
+  background: #2563eb33;
 }
 
-.status-badge--healthy { color: var(--status-healthy); background: #22C55E1A; }
-.status-badge--warning { color: var(--status-warning); background: #F59E0B1A; }
-.status-badge--failed { color: var(--status-failed); background: #EF44441A; }
+
+html.dark {
+  color-scheme: dark;
+  --color-page: #070809;
+  --color-surface: #0d0f12;
+  --color-card: #121418;
+  --color-border: #292d34;
+  --color-ink: #f5f6f8;
+  --color-ink-muted: #a3a9b3;
+  --color-primary: #5b78c7;
+  --color-primary-hover: #7893dc;
+  --color-healthy: #4ade80;
+  --color-warning: #fbbf24;
+  --color-failed: #fb7185;
+  --color-info: #93c5fd;
+  --color-primary-subtle: #111a2d;
+  --color-primary-border: #24385f;
+  --color-healthy-subtle: #10251a;
+  --color-warning-subtle: #2a2110;
+  --color-failed-subtle: #2b1519;
+  --color-neutral-subtle: #1a1d24;
+}
+
+html.dark body { background: var(--color-page); color: var(--color-ink); }

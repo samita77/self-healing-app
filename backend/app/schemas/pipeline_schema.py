@@ -22,6 +22,7 @@ class PipelineRunResponse(BaseModel):
     stage_results: list[StageResult] = []
     started_at: Optional[datetime] = None
     finished_at: Optional[datetime] = None
+    log_output: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -1,3 +1,5 @@
+import subprocess
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -14,7 +16,6 @@ router = APIRouter(prefix="/monitor", tags=["monitor"])
 
 @router.get("/check-and-heal")
 def check_and_heal(
-    url: str,
     deployment_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -30,6 +31,39 @@ def check_and_heal(
     if not owned:
         raise HTTPException(status_code=404, detail="Deployment not found")
 
+    if not owned.deployment_name:
+        raise HTTPException(
+            status_code=409,
+            detail="This deployment has no Kubernetes service to probe",
+        )
+
+    project = db.query(Project).filter(Project.id == owned.project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    k8s = K8sClient()
+    namespace = owned.namespace or "default"
+    node_port = owned.node_port or k8s.get_node_port(
+        owned.deployment_name, namespace
+    )
+    if not node_port:
+        raise HTTPException(
+            status_code=503,
+            detail="Could not find a NodePort for this deployment",
+        )
+    try:
+        node_ip = k8s.get_minikube_ip()
+    except (OSError, subprocess.SubprocessError, RuntimeError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Could not resolve the Minikube node address: {exc}",
+        ) from exc
+
+    health_path = (project.health_path or "/").strip()
+    if not health_path.startswith("/") or health_path.startswith("//"):
+        raise HTTPException(status_code=422, detail="Project health path must start with a single slash")
+    url = f"http://{node_ip}:{node_port}{health_path}"
+
     # The safeguard was previously hardcoded to True, which meant it could never fire. It is a database fact: is there an earlier successful deployment of this project to restore?
     has_previous = (
         db.query(Deployment)
@@ -43,8 +77,7 @@ def check_and_heal(
     )
 
     service = DeploymentHealthService()
-    namespace = owned.namespace or "default"
-    ready, desired = K8sClient().get_replica_counts(owned.deployment_name, namespace)
+    ready, desired = k8s.get_replica_counts(owned.deployment_name, namespace)
 
     result = service.check_and_heal(
         url=url,
@@ -57,6 +90,7 @@ def check_and_heal(
         db=db,
         deployment_id=deployment_id,
         project_id=owned.project_id,
+        check_window_s=3,
     )
 
     record = service.persist_health_check(
@@ -74,6 +108,7 @@ def check_and_heal(
     return {
         "health_check_id": record.id,
         "health_score": result["health_score"],
+        "endpoint_path": health_path,
         "decision": result["decision"],
         "failure_reason": result["failure_reason"],
         "action_taken": result["action_taken"],

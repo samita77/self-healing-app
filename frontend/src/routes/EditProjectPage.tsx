@@ -7,8 +7,9 @@ import { useProject, useUpdateProject } from "@/hooks/useProjects";
 import { fallbackMessage, httpStatus } from "@/lib/errors";
 import type { Project } from "@/lib/types";
 
-const FIELD =
-  "w-full rounded-lg border border-slate-600 bg-[#0F172A] px-3 py-2 text-sm focus:border-green-500 focus:outline-none";
+import { inputClass } from "@/components/ui/Input";
+
+const FIELD = inputClass;
 
 function EditProjectForm({
   project,
@@ -62,10 +63,10 @@ function EditProjectForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-lg border border-slate-600 bg-[#0F172A] p-6 space-y-3"
+      className="rounded-lg border border-border bg-surface p-6 space-y-3"
     >
       <div className="space-y-1">
-        <label htmlFor="repo_url" className="block text-xs text-slate-400">
+        <label htmlFor="repo_url" className="block text-xs text-ink-muted">
           Git repository URL
         </label>
         <input
@@ -81,7 +82,7 @@ function EditProjectForm({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label htmlFor="container_port" className="block text-xs text-slate-400">
+          <label htmlFor="container_port" className="block text-xs text-ink-muted">
             Container port
           </label>
           <input
@@ -96,7 +97,7 @@ function EditProjectForm({
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="health_path" className="block text-xs text-slate-400">
+          <label htmlFor="health_path" className="block text-xs text-ink-muted">
             Health path
           </label>
           <input
@@ -110,7 +111,7 @@ function EditProjectForm({
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="replicas" className="block text-xs text-slate-400">
+          <label htmlFor="replicas" className="block text-xs text-ink-muted">
             Replicas
           </label>
           <input
@@ -125,13 +126,13 @@ function EditProjectForm({
         </div>
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-failed">{error}</p>}
 
       <div className="flex items-center gap-3">
         <button
           type="submit"
           disabled={updateProject.isPending}
-          className="rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium disabled:opacity-50"
+          className="rounded-lg border border-border px-4 py-2 text-sm font-medium disabled:opacity-50"
         >
           {updateProject.isPending ? "Updating..." : "Update project"}
         </button>
@@ -151,17 +152,17 @@ export default function EditProjectPage() {
   if (projectQuery.isError || !projectQuery.data) return <NotFoundContent />;
 
   return (
-    <main className="p-10 space-y-6">
+    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <nav className="flex items-center gap-2">
         <Link
           to={`/projects/${projectId}`}
-          className="text-xs text-slate-400 underline underline-offset-2 hover:text-slate-200"
+          className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink"
         >
           ← Back to project
         </Link>
       </nav>
 
-      <h1 className="text-2xl font-semibold">Edit Project</h1>
+      <h1 className="text-xl font-semibold tracking-tight">Edit Project</h1>
 
       <EditProjectForm project={projectQuery.data} projectId={projectId} />
     </main>

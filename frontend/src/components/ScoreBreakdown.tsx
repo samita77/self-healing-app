@@ -39,7 +39,7 @@ export default function ScoreBreakdown({
     return (
         <table className="w-full text-sm">
             <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-slate-400">
+                <tr className="text-left text-xs uppercase tracking-wide text-ink-muted">
                     <th scope="col" className="py-2">Component</th>
                     <th scope="col" className="py-2 text-right">Raw</th>
                     <th scope="col" className="py-2 text-right">Weight</th>
@@ -53,14 +53,14 @@ export default function ScoreBreakdown({
                     const contribution = raw * r.weight;
 
                     return (
-                        <tr key={r.key} className="border-t border-[#272F42]">
+                        <tr key={r.key} className="border-t border-border">
                             <td className="py-2.5">
                                 <span>{r.label}</span>
-                                <span className="block text-xs text-slate-400">{r.hint}</span>
+                                <span className="block text-xs text-ink-muted">{r.hint}</span>
                             </td>
                             <td className="py-2.5 text-right font-mono tabular-nums">{raw.toFixed(1)}
                             </td>
-                            <td className="py-2.5 text-right font-mono text-slate-400">{r.weight.toFixed(2)}
+                            <td className="py-2.5 text-right font-mono text-ink-muted">{r.weight.toFixed(2)}
                             </td>
                             <td className="py-2.5 text-right font-mono tabular-nums">{contribution.toFixed(1)}
                             </td>
@@ -70,7 +70,7 @@ export default function ScoreBreakdown({
             </tbody>
 
             <tfoot>
-                <tr className="border-t-2 border-slate-600 font-semibold">
+                <tr className="border-t-2 border-border font-semibold">
                     <td className="py-2.5">Total health score</td>
                     <td className="py-2.5" />
                     <td className="py-2.5" />

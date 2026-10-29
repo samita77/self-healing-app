@@ -129,3 +129,46 @@ def delete_project(
     db.delete(project)
     db.commit()
     return None
+
+
+@router.get("/{project_id}/runtime-logs")
+def runtime_logs(
+    project_id: int,
+    deployment_id: int | None = None,
+    pod: str | None = None,
+    container: str | None = None,
+    tail: int = 500,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """List eligible pods or return a bounded container log snapshot."""
+    project_query = db.query(Project).filter(Project.id == project_id)
+    if current_user.role != "admin":
+        project_query = project_query.filter(Project.owner_id == current_user.id)
+    project = project_query.first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    deployments = db.query(Deployment).filter(
+        Deployment.project_id == project_id,
+        Deployment.namespace.isnot(None),
+        Deployment.deployment_name.isnot(None),
+    )
+    deployment = deployments.filter(Deployment.id == deployment_id).first() if deployment_id else deployments.order_by(Deployment.deployed_at.desc()).first()
+    if not deployment:
+        return {"pods": [], "logs": None}
+    from app.deployment.k8s_client import K8sClient
+    client = K8sClient()
+    try:
+        pods = client.list_pods(deployment.namespace, deployment.deployment_name)
+        if not pod:
+            return {"deployment_id": deployment.id, "pods": pods, "logs": None}
+        if pod not in {item["name"] for item in pods}:
+            raise HTTPException(status_code=404, detail="Pod not found for this deployment")
+        available_containers = next((item["containers"] for item in pods if item["name"] == pod), [])
+        selected_container = container or (available_containers[0] if available_containers else None)
+        if not selected_container or selected_container not in available_containers:
+            raise HTTPException(status_code=404, detail="Container not found for this pod")
+        return {"deployment_id": deployment.id, "pods": pods, "pod": pod, "container": selected_container,
+                "logs": client.pod_logs(deployment.namespace, pod, selected_container, max(1, min(tail, 1000)))}
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc

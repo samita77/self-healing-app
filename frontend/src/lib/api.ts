@@ -7,6 +7,7 @@ import type {
   PipelineRun,
   Project,
   RollbackEvent,
+  RuntimeLogs,
   User,
 } from "./types";
 
@@ -120,6 +121,13 @@ export const endpoints = {
   deployment: (id: number) => api.get<Deployment>(`/deployments/${id}`),
   healthChecks: (id: number) =>
     api.get<HealthCheck[]>(`/deployments/${id}/health-checks`),
+  runtimeLogs: (projectId: number, deploymentId?: number, pod?: string, container?: string) => {
+    const params = new URLSearchParams();
+    if (deploymentId) params.set("deployment_id", String(deploymentId));
+    if (pod) params.set("pod", pod);
+    if (container) params.set("container", container);
+    return api.get<RuntimeLogs>(`/projects/${projectId}/runtime-logs?${params}`);
+  },
   rollbackEvents: (id: number) =>
     api.get<RollbackEvent[]>(`/deployments/${id}/rollback-events`),
 
@@ -127,14 +135,17 @@ export const endpoints = {
   pipelineRuns: (projectId: number) =>
     api.get<PipelineRun[]>(`/pipelines/runs/${projectId}`),
   runPipeline: (projectId: number) =>
-    api.post<unknown>(`/pipelines/run/${projectId}`),
+    api.post<{ pipeline_run_id: number; status: string }>(`/pipelines/run/${projectId}`),
 
   // monitoring
-  checkAndHeal: (deploymentId: number, url: string) =>
-    api.get<unknown>(
-      `/monitor/check-and-heal?deployment_id=${deploymentId}` +
-        `&url=${encodeURIComponent(url)}`,
-    ),
+  checkAndHeal: (deploymentId: number) =>
+    api.get<{
+      health_check_id: number;
+      health_score: { score: number; status: "SUCCESSFUL" | "WARNING" | "FAILED" };
+      endpoint_path: string;
+      failure_reason: string | null;
+      action_taken: { rolled_back: boolean } | null;
+    }>(`/monitor/check-and-heal?deployment_id=${deploymentId}`),
 
   // admin
   users: () => api.get<User[]>("/users/"),

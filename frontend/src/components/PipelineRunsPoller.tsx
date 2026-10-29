@@ -1,6 +1,7 @@
 import { usePipelineRuns } from "@/hooks/usePipelines";
+import Button from "@/components/ui/Button";
 
-export default function PipelineRunsPoller({ projectId }: { projectId: number }) {
+export default function PipelineRunsPoller({ projectId, onOpenRun }: { projectId: number; onOpenRun?: (runId: number) => void }) {
   const { data: runs, isLoading, isError } = usePipelineRuns(projectId);
 
   if (isLoading) {
@@ -9,7 +10,7 @@ export default function PipelineRunsPoller({ projectId }: { projectId: number })
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-16 rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse"
+            className="h-16 rounded-lg bg-card border border-border animate-pulse"
           />
         ))}
       </div>
@@ -17,11 +18,11 @@ export default function PipelineRunsPoller({ projectId }: { projectId: number })
   }
 
   if (isError) {
-    return <p className="text-sm text-red-500">Could not load pipeline runs.</p>;
+    return <p className="text-sm text-failed">Could not load pipeline runs.</p>;
   }
 
   if (!runs || runs.length === 0) {
-    return <p className="text-sm text-slate-400">No pipeline runs yet.</p>;
+    return <p className="text-sm text-ink-muted">No pipeline runs yet.</p>;
   }
 
   return (
@@ -29,32 +30,33 @@ export default function PipelineRunsPoller({ projectId }: { projectId: number })
       {runs.slice(0, 5).map((r) => (
         <div
           key={r.id}
-          className="rounded-lg border border-slate-600 bg-[#1B2336] p-4"
+          className="rounded-lg border border-border bg-card p-4"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs">{r.commit_sha.slice(0, 7)}</span>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-ink0">
                 {r.started_at ? new Date(r.started_at).toLocaleString() : "-"}
               </span>
             </div>
             <span
               className={`text-xs uppercase ${
-                r.status === "success" ? "text-green-500" : "text-red-500"
+                r.status === "success" ? "text-healthy" : "text-failed"
               }`}
             >
               {r.status}
             </span>
           </div>
+          {onOpenRun && <Button size="sm" variant="ghost" className="mt-2" onClick={() => onOpenRun(r.id)}>View output</Button>}
           <ul className="mt-3 space-y-1">
             {r.stage_results.map((s) => (
               <li key={s.stage} className="flex items-center gap-2 text-xs">
-                <span className={s.success ? "text-green-500" : "text-red-500"}>
+                <span className={s.success ? "text-healthy" : "text-failed"}>
                   {s.success ? "PASS" : "FAIL"}
                 </span>
-                <span className="text-slate-300">{s.stage}</span>
+                <span className="text-ink-muted">{s.stage}</span>
                 {s.duration_s != null && (
-                  <span className="font-mono text-slate-400">{s.duration_s}s</span>
+                  <span className="font-mono text-ink-muted">{s.duration_s}s</span>
                 )}
               </li>
             ))}

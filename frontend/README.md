@@ -36,7 +36,8 @@ Configuration lives in `.env.local`:
 |---|---|---|
 | `VITE_API_BASE_URL` | Backend origin | `http://localhost:8000` |
 | `VITE_GRAFANA_URL` | Grafana base URL for the metrics iframe | *(empty — shows a hint)* |
-| `VITE_MINIKUBE_IP` | Node IP used to prefill health-check URLs (NodePorts are not on the host) | `192.168.49.2` |
+
+Health checks resolve the Minikube node address in the backend. Set `MINIKUBE_IP` in the backend environment only when automatic `minikube ip` lookup is unavailable. The browser never needs the cluster address.
 
 Only `VITE_`-prefixed variables are exposed to the browser.
 

@@ -1,118 +1,58 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
+import { Pulse, ArrowRight, ClockCounterClockwise, GitBranch, PencilSimple, Play, Scroll, HardDrives, SlidersHorizontal } from "@phosphor-icons/react";
 import DeleteButton from "@/components/DeleteButton";
+import PipelineRunDialog from "@/components/PipelineRunDialog";
 import NotFoundContent from "@/components/NotFoundContent";
 import PipelineRunsPoller from "@/components/PipelineRunsPoller";
+import StatusBadge from "@/components/StatusBadge";
+import Button, { buttonClass } from "@/components/ui/Button";
+import Card, { CardBody, CardHeader } from "@/components/ui/Card";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/Skeleton";
 import { useDeployments } from "@/hooks/useDeployments";
-import { useRunPipeline } from "@/hooks/usePipelines";
+import { endpoints } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import { usePipelineRuns, useRunPipeline } from "@/hooks/usePipelines";
 import { useProject } from "@/hooks/useProjects";
 import { fallbackMessage, httpStatus } from "@/lib/errors";
-import { useState } from "react";
 
+type Tab = "overview" | "deployments" | "pipelines" | "health" | "logs";
+const tabs: { id: Tab; label: string; icon: typeof Pulse }[] = [
+  { id: "overview", label: "Overview", icon: Pulse }, { id: "deployments", label: "Deployments", icon: HardDrives }, { id: "pipelines", label: "Pipelines", icon: GitBranch }, { id: "health", label: "Health", icon: SlidersHorizontal }, { id: "logs", label: "Logs & events", icon: Scroll },
+];
 export default function ProjectPage() {
-  const params = useParams();
-  const projectId = Number(params.id);
-  const isValidId = Number.isFinite(projectId);
-
-  const projectQuery = useProject(projectId);
-  const deploymentsQuery = useDeployments(projectId);
-  const runPipeline = useRunPipeline(projectId);
-  const [error, setError] = useState("");
-
-  if (!isValidId) return <NotFoundContent />;
-  if (projectQuery.isLoading) {
-    return (
-      <main className="p-10 space-y-6">
-        <div className="h-9 w-64 rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse" />
-        <div className="h-40 rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse" />
-        <div className="h-40 rounded-lg bg-[#1B2336] border border-slate-700 animate-pulse" />
-      </main>
-    );
-  }
+  const projectId = Number(useParams().id); const valid = Number.isFinite(projectId);
+  const projectQuery = useProject(projectId); const deploymentsQuery = useDeployments(projectId); const runsQuery = usePipelineRuns(projectId);
+  const runPipeline = useRunPipeline(projectId); const [error, setError] = useState(""); const [pipelineRunId, setPipelineRunId] = useState<number | null>(null); const [pipelineModalOpen, setPipelineModalOpen] = useState(false); const [tab, setTab] = useState<Tab>("overview"); const [logDeployment, setLogDeployment] = useState<number | undefined>(); const [logPod, setLogPod] = useState(""); const [logContainer, setLogContainer] = useState("");
+  const checkQueries = useQueries({ queries: (deploymentsQuery.data ?? []).map((deployment) => ({ queryKey: queryKeys.healthChecks(deployment.id), queryFn: () => endpoints.healthChecks(deployment.id) })) });
+  const runtimeLogsQuery = useQuery({ queryKey: ["runtime-logs", projectId, logDeployment, logPod, logContainer], queryFn: () => endpoints.runtimeLogs(projectId, logDeployment, logPod || undefined, logContainer || undefined), enabled: valid && tab === "logs" });
+  if (!valid) return <NotFoundContent />;
+  if (projectQuery.isLoading) return <main className="mx-auto max-w-6xl space-y-4 p-6 lg:p-10"><Skeleton className="h-28"/><Skeleton className="h-12"/><Skeleton className="h-72"/></main>;
   if (projectQuery.isError || !projectQuery.data) return <NotFoundContent />;
-
-  const project = projectQuery.data;
-  const deployments = deploymentsQuery.data ?? [];
-
-  async function onRunPipeline() {
-    setError("");
-    try {
-      await runPipeline.mutateAsync();
-    } catch (err) {
-      const status = httpStatus(err);
-      if (status === 401) setError("Your session expired. Please log in again.");
-      else if (status) setError(`Pipeline trigger failed (HTTP ${status})`);
-      else setError(fallbackMessage(err));
-    }
-  }
-
-  return (
-    <main className="p-10 space-y-6">
-      <h1 className="text-2xl font-semibold">Project #{project.id}</h1>
-
-      <div className="space-y-8">
-        <section className="rounded-lg border border-slate-600 bg-[#1B2336] p-6 space-y-2">
-          <h2 className="text-sm font-semibold">Repository</h2>
-          <p className="font-mono text-xs text-slate-300 break-all">
-            {project.repo_url}
-          </p>
-          {project.docker_image_name && (
-            <p className="font-mono text-xs text-slate-400">
-              {project.docker_image_name}
-            </p>
-          )}
-
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={onRunPipeline}
-              disabled={runPipeline.isPending}
-              className="rounded-lg border border-slate-600 px-2 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {runPipeline.isPending ? "Pipeline running ..." : "Run pipeline"}
-            </button>
-            {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
-          </div>
-
-          <div className="flex items-center gap-3 pt-2">
-            <Link
-              to={`/projects/${project.id}/edit`}
-              className="px-4 py-2 rounded-lg border border-slate-600 text-sm hover:bg-slate-700"
-            >
-              Edit
-            </Link>
-            <DeleteButton projectId={project.id} />
-          </div>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold">Pipeline runs</h2>
-          <PipelineRunsPoller projectId={project.id} />
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold">Deployments</h2>
-          {deploymentsQuery.isError ? (
-            <p className="text-sm text-red-500">Could not load deployments.</p>
-          ) : deployments.length === 0 ? (
-            <p className="text-sm text-slate-400">
-              No deployments yet. Run the pipeline to create the first one.
-            </p>
-          ) : (
-            deployments.map((d) => (
-              <Link
-                key={d.id}
-                to={`/deployments/${d.id}`}
-                className="block rounded-lg border border-slate-600 bg-[#1B2336] p-4 text-sm hover:border-slate-400"
-              >
-                <span className="font-mono">{d.version}</span>
-                <span className="ml-3 font-mono text-xs uppercase text-slate-400">
-                  {d.status}
-                </span>
-              </Link>
-            ))
-          )}
-        </section>
-      </div>
-    </main>
-  );
+  const project = projectQuery.data; const deployments = deploymentsQuery.data ?? []; const runs = runsQuery.data ?? [];
+  const healthChecks = checkQueries.flatMap((query) => query.data ?? []).sort((a,b)=>b.checked_at.localeCompare(a.checked_at));
+  const logs = [
+    ...runs.flatMap((run) => run.stage_results.filter((stage) => stage.error).map((stage) => ({ at: run.finished_at ?? run.started_at ?? "", kind: "Pipeline", message: `${stage.stage}: ${stage.error}` }))),
+    ...healthChecks.filter((check) => check.error).map((check) => ({ at: check.checked_at, kind: "Health check", message: check.error ?? "Health check failed" })),
+  ].sort((a,b)=>b.at.localeCompare(a.at));
+  async function onRun() { setError(""); setPipelineRunId(null); setPipelineModalOpen(true); try { const started = await runPipeline.mutateAsync(); setPipelineRunId(started.pipeline_run_id); } catch (err) { const status = httpStatus(err); setError(status === 401 ? "Your session expired. Please sign in again." : status ? `Pipeline trigger failed (HTTP ${status}): ${fallbackMessage(err)}` : fallbackMessage(err)); } }
+  return <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2 text-xs text-ink-muted"><Link to="/dashboard" className="hover:text-primary">Projects</Link><span>/</span><span>Project {project.id}</span></div><h1 className="mt-2 truncate text-xl font-semibold tracking-tight sm:text-3xl">{project.name}</h1><a className="mt-2 block max-w-3xl truncate font-mono text-sm text-ink-muted hover:text-primary" href={project.repo_url} target="_blank" rel="noreferrer">{project.repo_url}</a></div><div className="flex shrink-0 flex-wrap items-center gap-2"><Link to={`/projects/${project.id}/edit`} className={buttonClass("secondary","md")}><PencilSimple size={16} aria-hidden="true"/>Edit</Link><Button onClick={onRun} loading={runPipeline.isPending}><Play size={16} weight="fill" aria-hidden="true"/>{runPipeline.isPending ? "Starting…" : "Run pipeline"}</Button><DeleteButton projectId={project.id}/></div></header>
+    {error && <p role="alert" className="rounded-lg border border-failed/30 bg-failed-subtle px-4 py-3 text-sm text-failed">{error}</p>}
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Summary label="Deployments" value={String(deployments.length)} icon={HardDrives}/><Summary label="Pipeline runs" value={String(runs.length)} icon={GitBranch}/><Summary label="Health checks" value={String(healthChecks.length)} icon={Pulse}/><Summary label="Latest release" value={deployments[0]?.version ?? "—"} icon={ClockCounterClockwise}/></div>
+    <div className="overflow-x-auto border-b border-border"><div role="tablist" aria-label="Project sections" className="flex min-w-max gap-1">{tabs.map(({id,label,icon:Icon})=><button key={id} role="tab" aria-selected={tab===id} onClick={()=>setTab(id)} className={`inline-flex min-h-11 items-center gap-2 border-b-2 px-4 text-sm font-medium transition-colors ${tab===id?"border-primary text-primary":"border-transparent text-ink-muted hover:text-ink"}`}><Icon size={17} aria-hidden="true"/>{label}{id==="logs"&&logs.length>0&&<span className="rounded-full bg-surface px-2 py-0.5 text-xs">{logs.length}</span>}</button>)}</div></div>
+    <section role="tabpanel" className="min-h-64">
+      {tab==="overview"&&<div className="grid gap-5 lg:grid-cols-2"><Card><CardHeader><h2 className="font-semibold">Project configuration</h2></CardHeader><CardBody className="grid gap-4 text-sm sm:grid-cols-2"><Detail label="Container port" value={String(project.container_port??"—")}/><Detail label="Health endpoint" value={project.health_path??"—"}/><Detail label="Desired replicas" value={String(project.replicas??"—")}/><Detail label="Image" value={project.docker_image_name??"Not built yet"}/></CardBody></Card><Card><CardHeader><h2 className="font-semibold">Recent activity</h2></CardHeader><CardBody>{runs.length===0?<p className="text-sm text-ink-muted">No pipeline activity yet. Run a pipeline to build and deploy this project.</p>:<ul className="divide-y divide-border">{runs.slice(0,4).map(run=><li key={run.id} className="flex items-center justify-between gap-3 py-3 first:pt-0"><span className="font-mono text-xs">{run.commit_sha.slice(0,8)} · {run.branch}</span><span className="text-xs capitalize text-ink-muted">{run.status}</span></li>)}</ul>}</CardBody></Card></div>}
+      {tab==="deployments"&&<Card><CardHeader><h2 className="font-semibold">Deployments</h2></CardHeader><CardBody>{deployments.length===0?<EmptyState title="No deployments" description="Run a pipeline to create the first deployment."/>:<div className="divide-y divide-border">{deployments.map(d=><Link key={d.id} to={`/deployments/${d.id}`} className="flex items-center justify-between gap-4 py-4 first:pt-0 hover:text-primary"><div><p className="font-mono text-sm font-medium">{d.version}</p><p className="mt-1 text-xs text-ink-muted">{new Date(d.deployed_at).toLocaleString()}</p></div><span className="flex items-center gap-3 text-sm">{d.health_score!=null?`${d.health_score} health`:"No score"}<ArrowRight size={16}/></span></Link>)}</div>}</CardBody></Card>}
+      {tab==="pipelines"&&<Card><CardHeader><h2 className="font-semibold">Pipeline runs</h2></CardHeader><CardBody><PipelineRunsPoller projectId={project.id} onOpenRun={(id) => { setError(""); setPipelineRunId(id); setPipelineModalOpen(true); }}/></CardBody></Card>}
+      {tab==="health"&&<Card><CardHeader><h2 className="font-semibold">Health check results</h2></CardHeader><CardBody>{healthChecks.length===0?<EmptyState title="No health checks recorded" description="Start a health check for a deployed service." action={deployments[0] ? <Link to={`/deployments/${deployments[0].id}`} className={buttonClass("primary","sm")}>Open latest deployment</Link> : <Button onClick={onRun} loading={runPipeline.isPending}>Run deployment pipeline</Button>}/>:<div className="space-y-3">{healthChecks.slice(0,20).map(check=><div key={check.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3"><div className="flex items-center gap-3"><StatusBadge status={check.status}/><span className="text-sm">Score <strong>{check.health_score.toFixed(1)}</strong></span></div><span className="text-xs text-ink-muted">{check.response_time_ms!=null?`${Math.round(check.response_time_ms)} ms · `:""}{new Date(check.checked_at).toLocaleString()}</span></div>)}</div>}</CardBody></Card>}
+      {tab==="logs"&&<Card><CardHeader className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">Container logs</h2><p className="mt-1 text-xs text-ink-muted">Recent stdout and stderr from Kubernetes.</p></div><Button variant="secondary" onClick={()=>void runtimeLogsQuery.refetch()} loading={runtimeLogsQuery.isFetching}>Refresh</Button></CardHeader><CardBody className="space-y-4"><div className="grid gap-3 sm:grid-cols-3"><label className="text-xs font-medium">Deployment<select className="mt-1 block w-full rounded-lg border border-border bg-card p-2 text-sm" value={logDeployment??""} onChange={e=>{setLogDeployment(e.target.value?Number(e.target.value):undefined);setLogPod("");setLogContainer("")}}><option value="">Latest deployment</option>{deployments.filter(d=>d.namespace&&d.deployment_name).map(d=><option key={d.id} value={d.id}>{d.version} · #{d.id}</option>)}</select></label><label className="text-xs font-medium">Pod<select className="mt-1 block w-full rounded-lg border border-border bg-card p-2 text-sm" value={logPod} onChange={e=>{setLogPod(e.target.value);setLogContainer("")}}><option value="">Select pod</option>{runtimeLogsQuery.data?.pods.map(p=><option key={p.name} value={p.name}>{p.name} · {p.phase}</option>)}</select></label><label className="text-xs font-medium">Container<select className="mt-1 block w-full rounded-lg border border-border bg-card p-2 text-sm" value={logContainer} onChange={e=>setLogContainer(e.target.value)}><option value="">Default container</option>{runtimeLogsQuery.data?.pods.find(p=>p.name===logPod)?.containers.map(c=><option key={c}>{c}</option>)}</select></label></div>{runtimeLogsQuery.isError?<p role="alert" className="text-sm text-failed">Could not fetch pod logs. Check Kubernetes access and try refreshing.</p>:runtimeLogsQuery.isLoading?<Skeleton className="h-64"/>:!runtimeLogsQuery.data?.pods.length?<EmptyState title="No Kubernetes deployment" description="Run a pipeline that deploys successfully before viewing container logs."/>:!logPod?<EmptyState title="Choose a pod" description="Select a pod to load its recent container output."/>:<pre className="max-h-[32rem] overflow-auto rounded-lg bg-neutral-subtle p-4 font-mono text-xs leading-5 text-ink whitespace-pre-wrap">{runtimeLogsQuery.data?.logs||"No output in the recent log window."}</pre>}</CardBody></Card>}
+    </section>
+    <PipelineRunDialog open={pipelineModalOpen} runId={pipelineRunId} error={error} onClose={() => { setPipelineModalOpen(false); setPipelineRunId(null); }} />
+  </main>;
 }
+function Summary({label,value,icon:Icon}:{label:string;value:string;icon:typeof Pulse}){return <Card><CardBody className="flex items-center gap-3 p-4"><span className="rounded-lg bg-primary-subtle p-2 text-primary"><Icon size={18} aria-hidden="true"/></span><div className="min-w-0"><p className="text-xs text-ink-muted">{label}</p><p className="truncate text-lg font-semibold tabular-nums">{value}</p></div></CardBody></Card>}
+function Detail({label,value}:{label:string;value:string}){return <div className="min-w-0"><p className="text-xs text-ink-muted">{label}</p><p className="mt-1 truncate font-medium">{value}</p></div>}

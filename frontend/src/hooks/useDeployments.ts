@@ -37,7 +37,7 @@ export function useCheckHealth(deploymentId: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (url: string) => endpoints.checkAndHeal(deploymentId, url),
+    mutationFn: () => endpoints.checkAndHeal(deploymentId),
     onSuccess: () => {
       // Covers health checks, rollback events, the deployment and list scores.
       void queryClient.invalidateQueries({ queryKey: ["deployments"] });

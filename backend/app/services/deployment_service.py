@@ -35,9 +35,16 @@ class DeploymentHealthService:
         db=None,
         deployment_id: int | None = None,
         project_id: int | None = None,
+        check_window_s: int | None = None,
     ) -> dict:
         readiness_score = (ready / desired * 100) if desired else 0.0
-        probe, score = self.verifier.check_and_score(url, readiness_score, weights)
+        probe, score = self.verifier.check_and_score(
+            url,
+            readiness_score,
+            weights,
+            duration_s=check_window_s,
+            interval_s=1 if check_window_s is not None else None,
+        )
 
         decision = self.rollback_engine.decide(
             score["score"],
@@ -105,6 +112,9 @@ class DeploymentHealthService:
             components=score.get("components"),
         )
         db.add(record)
+        deployment = db.query(Deployment).filter(Deployment.id == deployment_id).first()
+        if deployment:
+            deployment.health_score = score["score"]
         db.commit()
         db.refresh(record)
         return record

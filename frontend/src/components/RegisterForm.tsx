@@ -4,8 +4,10 @@ import { Link, useNavigate } from "react-router";
 import { useRegister } from "@/hooks/useAuth";
 import { fallbackMessage, httpStatus } from "@/lib/errors";
 
-const FIELD =
-  "w-full rounded-lg border border-slate-600 bg-[#0F172A] px-3 py-2 text-sm focus:border-green-500 focus:outline-none";
+import { inputClass } from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+
+const FIELD = inputClass;
 
 const EMPTY = {
   full_name: "",
@@ -75,7 +77,7 @@ export default function RegisterForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       <div className="space-y-1">
-        <label htmlFor="full_name" className="block text-xs text-slate-400">
+        <label htmlFor="full_name" className="block text-xs text-ink-muted">
           Full name
         </label>
         <input
@@ -90,7 +92,7 @@ export default function RegisterForm() {
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="email" className="block text-xs text-slate-400">
+        <label htmlFor="email" className="block text-xs text-ink-muted">
           Email
         </label>
         <input
@@ -106,7 +108,7 @@ export default function RegisterForm() {
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="password" className="block text-xs text-slate-400">
+        <label htmlFor="password" className="block text-xs text-ink-muted">
           Password
         </label>
         <input
@@ -123,7 +125,7 @@ export default function RegisterForm() {
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="confirm" className="block text-xs text-slate-400">
+        <label htmlFor="confirm" className="block text-xs text-ink-muted">
           Confirm password
         </label>
         <input
@@ -139,17 +141,17 @@ export default function RegisterForm() {
         />
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-failed">{error}</p>}
 
-      <button
+      <Button
         type="submit"
-        disabled={register.isPending}
-        className="w-full rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium disabled:opacity-50"
+        loading={register.isPending}
+        className="w-full"
       >
         {register.isPending ? "Creating account..." : "Create account"}
-      </button>
+      </Button>
 
-      <p className="text-center text-xs text-slate-400">
+      <p className="text-center text-xs text-ink-muted">
         Already registered?{" "}
         <Link to="/login" className="underline underline-offset-2">
           Sign in

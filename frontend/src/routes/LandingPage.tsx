@@ -1,89 +1,23 @@
 import { Link } from "react-router";
+import { Pulse, ArrowRight, ArrowUpRight, ArrowsClockwise, ChartLineUp, GitBranch, ShieldCheck } from "@phosphor-icons/react";
+import { buttonClass } from "@/components/ui/Button";
+import Card, { CardBody } from "@/components/ui/Card";
 
+const features = [
+  { icon: GitBranch, eyebrow: "Continuous delivery", title: "Deploy from your repository", text: "Connect a Git repository and build, test, and ship your container through a repeatable pipeline." },
+  { icon: ChartLineUp, eyebrow: "Live observability", title: "Know when health changes", text: "Track availability, response time, and a weighted health score for every deployment." },
+  { icon: ArrowsClockwise, eyebrow: "Automated recovery", title: "Recover with confidence", text: "Consecutive failures trigger a guarded rollback to a known healthy deployment." },
+];
 export default function LandingPage() {
-  return (
-    <main className="flex flex-1 flex-col bg-[#0F172A] text-[#F8FAFC]">
-      <nav className="border-b border-[#475569] px-10 py-4 flex justify-between items-center">
-        <Link to="/" className="flex items-center gap-2 font-semibold text-xl">
-          <span
-            aria-hidden="true"
-            className="inline-block h-2.5 w-2.5 rounded-full bg-[#22C55E]"
-          />
-          <span>Self-Healing DevOps</span>
-        </Link>
-        <div className="flex gap-3">
-          <Link
-            to="/login"
-            className="px-4 py-2 rounded-lg border border-slate-600 text-sm"
-          >
-            Log in
-          </Link>
-          <Link
-            to="/register"
-            className="px-4 py-2 rounded-lg border border-[#22C55E] text-[#22C55E] text-sm"
-          >
-            Sign up
-          </Link>
-        </div>
-      </nav>
-
-      <section className="flex-1 flex flex-col items-center justify-center px-10 py-16 text-center">
-        <h1 className="text-4xl font-bold mb-4">Self-Healing DevOps Platform</h1>
-        <p className="text-lg text-slate-400 max-w-2xl mb-8">
-          Automated deployment, health scoring, and rollback for containerised
-          applications. Clone a repo, build and push an image, deploy to
-          Kubernetes, score health — and auto-rollback if it degrades.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="rounded-lg border border-slate-700 bg-[#1B2336] p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">
-              Auto-deploy
-            </h3>
-            <p className="text-sm text-slate-300">
-              Clones your repo, builds a container image, runs tests, and pushes
-              to the local registry.
-            </p>
-          </div>
-          <div className="rounded-lg border border-slate-700 bg-[#1B2336] p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">
-              Health scoring
-            </h3>
-            <p className="text-sm text-slate-300">
-              Weighted multi-component score with p95 response time and
-              exponential decay.
-            </p>
-          </div>
-          <div className="rounded-lg border border-slate-700 bg-[#1B2336] p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">
-              Auto-rollback
-            </h3>
-            <p className="text-sm text-slate-300">
-              Two-consecutive-failure guard prevents harmful automation. Rolls
-              back to known-good versions.
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <Link
-            to="/login"
-            className="inline-block px-6 py-3 rounded-lg border border-[#22C55E] bg-[#22C55E] text-[#0F172A] font-semibold text-sm"
-          >
-            Get started
-          </Link>
-          <p className="text-xs text-slate-500">
-            Already have an account?{" "}
-            <Link to="/login" className="underline">
-              Log in
-            </Link>
-          </p>
-        </div>
-      </section>
-
-      <footer className="border-t border-[#475569] py-4 text-xs text-slate-500 text-center">
-        CACS452 Project III · Self-Healing DevOps Platform
-      </footer>
-    </main>
-  );
+  return <main className="min-h-[calc(100vh-112px)] bg-surface">
+    <section className="relative isolate overflow-hidden border-b border-border bg-card">
+      <div aria-hidden="true" className="absolute -right-24 -top-40 -z-10 h-[28rem] w-[28rem] rounded-full bg-primary-subtle/70 blur-3xl" />
+      <div className="mx-auto grid max-w-[1400px] items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1.1fr_.9fr] lg:px-10 lg:py-24">
+        <div><div className="inline-flex items-center gap-2 rounded-full border border-primary-border bg-primary-subtle px-3 py-1.5 text-xs font-medium text-primary"><Pulse size={15} weight="bold" aria-hidden="true" /> Self-healing delivery platform</div><h1 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tight text-ink sm:text-5xl lg:text-6xl">Ship reliably.<br /><span className="text-primary">Recover automatically.</span></h1><p className="mt-5 max-w-xl text-base leading-7 text-ink-muted sm:text-lg">Build and deploy containerised applications, monitor their health, and roll back automatically when a release degrades.</p><div className="mt-8 flex flex-wrap items-center gap-3"><Link to="/register" className={buttonClass("primary", "md", "h-11 px-5")}>Get started <ArrowRight size={17} aria-hidden="true" /></Link><Link to="/login" className={buttonClass("secondary", "md", "h-11 px-5")}>Sign in</Link></div><div className="mt-8 flex items-center gap-2 text-xs text-ink-muted"><ShieldCheck size={16} className="text-healthy" aria-hidden="true" /> Two-failure guard protects healthy releases</div></div>
+        <Card className="overflow-hidden border-border shadow-lg shadow-slate-200/60"><div className="flex items-center justify-between border-b border-border px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-lg bg-primary-subtle text-primary"><ChartLineUp size={20} aria-hidden="true" /></span><div><p className="text-sm font-semibold">Deployment health</p><p className="text-xs text-ink-muted">Production · latest release</p></div></div><span className="inline-flex items-center gap-1.5 rounded-full bg-healthy-subtle px-2.5 py-1 text-xs font-medium text-healthy"><span className="h-1.5 w-1.5 rounded-full bg-healthy" /> Healthy</span></div><CardBody><div className="flex items-end justify-between"><div><p className="text-xs font-medium uppercase tracking-wide text-ink-muted">Health score</p><p className="mt-1 text-5xl font-semibold tracking-tight text-ink">96<span className="text-lg font-medium text-ink-muted">/100</span></p></div><p className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-healthy"><ArrowUpRight size={14} aria-hidden="true" /> 4.2%</p></div><div className="mt-5 h-2 overflow-hidden rounded-full bg-neutral-subtle"><div className="h-full w-[96%] rounded-full bg-gradient-to-r from-blue-600 to-green-500" /></div><div className="mt-5 grid grid-cols-3 gap-3 border-t border-border pt-4"><div><p className="text-[11px] text-ink-muted">Availability</p><p className="mt-1 text-sm font-semibold">99.98%</p></div><div><p className="text-[11px] text-ink-muted">P95 latency</p><p className="mt-1 text-sm font-semibold">128 ms</p></div><div><p className="text-[11px] text-ink-muted">Replicas</p><p className="mt-1 text-sm font-semibold">3 / 3 ready</p></div></div><p className="mt-4 border-t border-border pt-3 text-[11px] text-ink-muted">Illustrative preview</p></CardBody></Card>
+      </div>
+    </section>
+    <section className="mx-auto max-w-[1400px] px-4 py-14 sm:px-6 lg:px-10 lg:py-16"><div className="max-w-xl"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">One release loop</p><h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-3xl">From code to recovery, in one place.</h2></div><div className="mt-7 grid gap-4 md:grid-cols-3">{features.map(({ icon: Icon, eyebrow, title, text }) => <Card key={title} className="transition-all hover:-translate-y-0.5 hover:shadow-md motion-reduce:transform-none"><CardBody className="p-5"><span className="inline-grid h-10 w-10 place-items-center rounded-lg bg-primary-subtle text-primary"><Icon size={21} aria-hidden="true" /></span><p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">{eyebrow}</p><h3 className="mt-1.5 font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-ink-muted">{text}</p></CardBody></Card>)}</div></section>
+    <footer className="border-t border-border bg-card px-4 py-5 text-center text-xs text-ink-muted">CACS452 Project III · Self-Healing DevOps Platform</footer>
+  </main>;
 }

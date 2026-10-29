@@ -27,6 +27,7 @@ class TestStage(PipelineStage):
         # Keep only the summary - a failing suite can emit thousands of lines
         output = (result.stdout or "") + (result.stderr or "")
         print(output[-4000:])
+        if context.get("log"): context["log"](output[-20000:])
 
         if result.returncode != 0:
             print(f"[{self.name}] FAILED")

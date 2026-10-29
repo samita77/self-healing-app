@@ -116,6 +116,7 @@ def list_health_checks(
             "error": c.error,
             "health_score": c.health_score,
             "status": c.status,
+            "components": c.components,
             "checked_at": c.checked_at,
         }
         for c in checks

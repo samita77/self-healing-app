@@ -3,8 +3,12 @@ import type { FormEvent } from "react";
 import { useCreateProject } from "@/hooks/useProjects";
 import { fallbackMessage, httpStatus } from "@/lib/errors";
 
-const FIELD =
-  "w-full rounded-lg border border-slate-600 bg-[#0F172A] px-3 py-2 text-sm focus:border-green-500 focus:outline-none";
+import { inputClass } from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import Dialog from "@/components/ui/Dialog";
+import { useState as useOpenState } from "react";
+
+const FIELD = inputClass;
 
 const INITIAL = {
   name: "",
@@ -18,6 +22,7 @@ export default function ProjectForm() {
 
   const [form, setForm] = useState(INITIAL);
   const [error, setError] = useState("");
+  const [open, setOpen] = useOpenState(false);
 
   function update(field: keyof typeof INITIAL, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -47,6 +52,7 @@ export default function ProjectForm() {
     try {
       await createProject.mutateAsync(payload);
       setForm(INITIAL);
+      setOpen(false);
     } catch (err) {
       const status = httpStatus(err);
       if (status === 401) setError("Your session expired. Please log in again.");
@@ -56,14 +62,16 @@ export default function ProjectForm() {
   }
 
   return (
+    <>
+      <Button type="button" onClick={() => setOpen(true)}>Register project</Button>
+      <Dialog open={open} onClose={() => setOpen(false)} title="Register a project">
     <form
       onSubmit={onSubmit}
-      className="rounded-lg border border-slate-600 bg-[#1B2336] p-6 space-y-3"
+      className="space-y-4"
     >
-      <h2 className="text-sm font-semibold">Register a project</h2>
 
       <div className="space-y-1">
-        <label htmlFor="name" className="block text-xs text-slate-400">
+        <label htmlFor="name" className="block text-xs text-ink-muted">
           Name
         </label>
         <input
@@ -77,7 +85,7 @@ export default function ProjectForm() {
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="repo_url" className="block text-xs text-slate-400">
+        <label htmlFor="repo_url" className="block text-xs text-ink-muted">
           Git repository URL
         </label>
         <input
@@ -94,7 +102,7 @@ export default function ProjectForm() {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label htmlFor="container_port" className="block text-xs text-slate-400">
+          <label htmlFor="container_port" className="block text-xs text-ink-muted">
             Container port
           </label>
           <input
@@ -109,7 +117,7 @@ export default function ProjectForm() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="health_path" className="block text-xs text-slate-400">
+          <label htmlFor="health_path" className="block text-xs text-ink-muted">
             Health path
           </label>
           <input
@@ -123,15 +131,16 @@ export default function ProjectForm() {
         </div>
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-failed">{error}</p>}
 
-      <button
+      <Button
         type="submit"
-        disabled={createProject.isPending}
-        className="rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium disabled:opacity-50"
+        loading={createProject.isPending}
       >
         {createProject.isPending ? "Registering..." : "Register project"}
-      </button>
+      </Button>
     </form>
+      </Dialog>
+    </>
   );
 }

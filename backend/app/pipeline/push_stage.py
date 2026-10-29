@@ -8,6 +8,6 @@ class PushStage(PipelineStage):
         self.docker = docker or DockerService()
 
     def execute(self, context: dict) -> bool:
-        ok = self.docker.push(context["docker_image_name"])
+        ok = self.docker.push(context["docker_image_name"], context.get("log"))
         print(f"[{self.name}] {'SUCCESS' if ok else 'FAILED'}")
         return ok

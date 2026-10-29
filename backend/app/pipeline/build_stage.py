@@ -8,6 +8,6 @@ class BuildStage(PipelineStage):
         self.docker = docker or DockerService()
 
     def execute(self, context:dict) -> bool:
-        ok = self.docker.build(context["repo_path"], context["docker_image_name"])
+        ok = self.docker.build(context["repo_path"], context["docker_image_name"], context.get("log"))
         print(f"[{self.name}] {'SUCCESS' if ok else 'FAILED'}")
         return ok
