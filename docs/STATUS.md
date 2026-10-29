@@ -198,11 +198,26 @@ utils/            validators module
 ```bash
 minikube start --cpus=4 --memory=3072
 minikube addons enable registry
+
+# The pipeline pushes to localhost:5000, but minikube's registry addon only
+# listens inside the node. Publish it on the host (keep this running):
+kubectl port-forward -n kube-system svc/registry 5000:80 &
+
 kubectl apply -f k8s-manifests/
 
 cd backend  && .venv/bin/uvicorn app.main:app --reload
 cd frontend && npm run dev
 ```
+
+If you prefer a bridge that survives terminal closes, run an nginx stream
+proxy on the host instead of the `port-forward`:
+
+```bash
+docker run -d --name registry-bridge --restart unless-stopped --network host \
+  nginx:alpine sh -c "printf 'events {}\nstream { server { listen 127.0.0.1:5000; proxy_pass 192.168.49.2:5000; } }\n' > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+```
+
+Verify with `curl -s -o /dev/null -w '%{http_code}\n' http://localhost:5000/v2/` (expect `200`).
 
 ### Test
 
@@ -305,6 +320,7 @@ Two rules that must not be broken:
 | Issue | Impact |
 |---|---|
 | `kubectl` 1.35.9 against cluster 1.37.0 | Warning only. `minikube kubectl` uses a matching version. |
+| `localhost:5000` not published after `minikube start` | Pipeline **Push** fails with `connection refused`. The registry addon listens inside the node only; keep the `kubectl port-forward ... 5000:80` (or the nginx bridge above) running. |
 | `mongodb.yaml` Pod is `OOMKilled` at 256 Mi limit | Wasted memory. The application uses MongoDB Atlas, so this Pod serves no purpose — delete it. |
 | `DEPLOYING`, `VERIFYING`, `SCANNING` states are unreachable | By design — those stages exist in the state diagram for completeness. The pipeline uses Build → Test → Push → Deploy → Verify. |
 
