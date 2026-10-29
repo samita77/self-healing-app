@@ -10,6 +10,9 @@ import {
   useRollbackEvents,
 } from "@/hooks/useDeployments";
 
+/** IP of the minikube node; NodePorts are only reachable there. */
+const MINIKUBE_IP = import.meta.env.VITE_MINIKUBE_IP ?? "192.168.49.2";
+
 function DeploymentSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Loading deployment">
@@ -155,7 +158,9 @@ export default function DeploymentPage() {
             deploymentId={deployment.id}
             defaultUrl={
               deployment.node_port
-                ? `http://localhost:${deployment.node_port}/health`
+                ? // NodePorts are published on the minikube node, not on the
+                  // host, so `localhost` would never reach the workload.
+                  `http://${MINIKUBE_IP}:${deployment.node_port}/health`
                 : ""
             }
           />
